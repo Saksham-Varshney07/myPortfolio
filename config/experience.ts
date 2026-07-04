@@ -21,6 +21,9 @@ export const experience: ExperienceItem[] = [
       "Engineered a real-time inference backend operating at 15 FPS, seamlessly fusing AI object detection with hardware-accelerated EAN-13/QR scanning via the Open Food Facts API.",
       "Developed an interactive dashboard featuring live bounding-box overlays and manual region of interest cropping, automating checkout flows by generating structured JSON payloads for payment gateways."
     ],
+    links: [
+      { type: "github", label: "Source Code", url: "https://github.com/Saksham-Varshney07/VisionForge" }
+    ]
   },
   {
     company: "Outlier.ai",

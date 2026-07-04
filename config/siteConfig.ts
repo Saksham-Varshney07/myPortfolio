@@ -33,7 +33,6 @@ export interface ContactRow {
 
 export interface Contact {
   email: string
-  calendar: string
   heading: string
   subheading: string
   rows: ContactRow[]
@@ -87,7 +86,6 @@ export const siteConfig: SiteConfig = {
 
   contact: {
     email: "sakshamvarshney0701@gmail.com",
-    calendar: "https://cal.com/janedeveloper",
     heading: "Let's Connect",
     subheading: "Actively exploring new opportunities. If you're building something exciting, let's talk.",
     rows: [

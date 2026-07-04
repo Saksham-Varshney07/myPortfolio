@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import MobileLayout from "./MobileLayout"
 import MenuBar from "./MenuBar"
-import MacWindow from "./MacWindow"
+import Window from "./Window"
 import Dock from "./Dock"
 import GitHubHeatmap from "./GitHubHeatmap"
 import StatusWidget from "./widgets/StatusWidget"
@@ -127,7 +127,7 @@ export default function Desktop() {
       {windows.map((win) => {
         const Section = win.component
         return (
-          <MacWindow
+          <Window
             key={win.id}
             windowId={win.id}
             title={win.id === "resume" ? `Resume — ${siteConfig.personal.fullName}` : win.title}
@@ -144,7 +144,7 @@ export default function Desktop() {
             offsetY={win.offsetY}
           >
             <Section compact />
-          </MacWindow>
+          </Window>
         )
       })}
 

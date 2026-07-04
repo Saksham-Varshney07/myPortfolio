@@ -4,7 +4,7 @@ import { useEffect, useId, useRef } from "react"
 import { motion, AnimatePresence, useDragControls } from "framer-motion"
 import { Minus, Square, X } from "lucide-react"
 
-interface MacWindowProps {
+interface WindowProps {
   windowId?: string
   title: string
   isOpen: boolean
@@ -22,7 +22,7 @@ interface MacWindowProps {
 }
 
 
-export default function MacWindow({
+export default function Window({
   windowId,
   title,
   isOpen,
@@ -37,7 +37,7 @@ export default function MacWindow({
   height = 520,
   offsetX = 0,
   offsetY = 0,
-}: MacWindowProps) {
+}: WindowProps) {
   const dragControls = useDragControls()
   const dialogRef = useRef<HTMLDivElement>(null)
   const reactId = useId()
@@ -106,14 +106,13 @@ export default function MacWindow({
               borderRadius: 8,
               backdropFilter: "blur(16px)",
               WebkitBackdropFilter: "blur(16px)",
-              filter: isFocused ? "none" : "blur(1.5px)",
               border: isFocused
                 ? "1px solid var(--window-border-focused)"
                 : "1px solid var(--window-border-unfocused)",
               boxShadow: isFocused
                 ? "0 40px 80px rgba(0,0,0,0.9), 0 0 0 0.5px rgba(0,0,0,1)"
                 : "0 16px 40px rgba(0,0,0,0.7), 0 0 0 0.5px rgba(0,0,0,1)",
-              transition: "box-shadow 0.2s ease, border-color 0.2s ease, filter 0s",
+              transition: "box-shadow 0.2s ease, border-color 0.2s ease",
             }}
           >
             <div

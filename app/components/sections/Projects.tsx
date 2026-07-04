@@ -9,7 +9,7 @@ import { projects, type ProjectItem } from "@/config/projects"
 
 function ProjectCard({ p, i, onPlayVideo }: { p: ProjectItem; i: number; onPlayVideo: (url: string) => void }) {
   const [isHovered, setIsHovered] = useState(false)
-  const [countdown, setCountdown] = useState(5)
+  const [countdown, setCountdown] = useState(3)
 
   useEffect(() => {
     let timer: NodeJS.Timeout
@@ -19,7 +19,7 @@ function ProjectCard({ p, i, onPlayVideo }: { p: ProjectItem; i: number; onPlayV
       } else {
         onPlayVideo(p.videoUrl)
         setIsHovered(false)
-        setCountdown(5)
+        setCountdown(3)
       }
     }
     return () => clearTimeout(timer)
@@ -31,7 +31,7 @@ function ProjectCard({ p, i, onPlayVideo }: { p: ProjectItem; i: number; onPlayV
 
   const handleMouseLeave = () => {
     setIsHovered(false)
-    setCountdown(5)
+    setCountdown(3)
   }
 
   return (

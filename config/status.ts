@@ -23,7 +23,7 @@ export interface StatusConfig {
 
 export const status: StatusConfig = {
   available: true,
-  label: "Open to work",
+  label: "npm hire saksham",
   currently: [
     { label: "Building", value: "Studease.in : a one stop education solution for students" },
     { label: "Reading",  value: "...." },
