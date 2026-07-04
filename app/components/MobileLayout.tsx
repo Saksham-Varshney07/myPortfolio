@@ -37,18 +37,26 @@ export default function MobileLayout() {
   }, [])
 
   useEffect(() => {
-    const observers: IntersectionObserver[] = []
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveId(entry.target.id)
+          }
+        })
+      },
+      { 
+        threshold: 0,
+        rootMargin: "-100px 0px -60% 0px" // Triggers when the top of a section reaches the top third of the screen
+      }
+    )
+
     NAV.forEach(({ id }) => {
       const el = document.getElementById(id)
-      if (!el) return
-      const obs = new IntersectionObserver(
-        ([entry]) => { if (entry.isIntersecting) setActiveId(id) },
-        { threshold: 0.4 }
-      )
-      obs.observe(el)
-      observers.push(obs)
+      if (el) observer.observe(el)
     })
-    return () => observers.forEach((o) => o.disconnect())
+
+    return () => observer.disconnect()
   }, [])
 
   const scrollTo = (id: string) => {
