@@ -2,7 +2,7 @@
 
 Welcome to the source code of my personal portfolio! 
 
-Instead of a traditional scrolling website, this portfolio is designed as a highly interactive, MacOS-inspired desktop environment. It features draggable windows, a functional dock, dynamic widgets, and an immersive user experience built from the ground up.
+Instead of a traditional scrolling website, this portfolio is designed as a highly interactive, WindowsOS-inspired desktop environment. It features draggable windows, a functional dock, dynamic widgets, and an immersive user experience built from the ground up to showcase my work.
 
 ##  Features
 
@@ -19,19 +19,6 @@ Instead of a traditional scrolling website, this portfolio is designed as a high
 - **Animations:** [Framer Motion](https://www.framer.com/motion/)
 - **Icons:** [Lucide React](https://lucide.dev/)
 - **Language:** TypeScript
-
-##  Getting Started
-
-To run this project locally, simply clone the repository and install the dependencies:
-
-```bash
-git clone https://github.com/Saksham-Varshney07/portfolio.git
-cd portfolio
-npm install
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ##  Contact
 
