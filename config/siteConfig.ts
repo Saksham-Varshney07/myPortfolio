@@ -63,7 +63,7 @@ export const siteConfig: SiteConfig = {
     firstName: "Saksham",
     lastName: "Varshney",
     fullName: "Saksham Varshney",
-    initials: "JD",
+    initials: "SV",
     role: "AI · Machine Learning · Deep Learning ·  RLHF",
     shortRole: "Full-Stack Software Engineer",
     tagline:

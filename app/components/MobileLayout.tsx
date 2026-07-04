@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { Sun, Moon } from "lucide-react"
 import Hero from "./Hero"
 import Experience from "./sections/Experience"
 import Projects from "./sections/Projects"
@@ -14,16 +15,16 @@ const NAV = [
   { id: "about",      label: "About" },
   { id: "experience", label: "Experience" },
   { id: "projects",   label: "Projects" },
-  { id: "writing",    label: "Writing" },
   { id: "contact",    label: "Contact" },
   { id: "resume",     label: "Resume" },
 ]
 
-const BORDER = "1px solid rgba(255,255,255,0.07)"
-
 export default function MobileLayout() {
   const [time, setTime] = useState("")
   const [activeId, setActiveId] = useState("about")
+  const [isLightMode, setIsLightMode] = useState(false)
+
+  const BORDER = isLightMode ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.07)"
 
   useEffect(() => {
     const update = () => {
@@ -52,27 +53,44 @@ export default function MobileLayout() {
 
   const scrollTo = (id: string) => {
     const el = document.getElementById(id)
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" })
+    if (el) {
+      const top = el.getBoundingClientRect().top + window.scrollY - 90
+      window.scrollTo({ top, behavior: "smooth" })
+    }
   }
 
   return (
-    <div className="desktop-bg" style={{ minHeight: "100dvh", color: "#f0f0f0" }}>
+    <div 
+      className="desktop-bg" 
+      data-mobile-theme={isLightMode ? "light" : undefined}
+      style={{ 
+        minHeight: "100dvh", 
+        color: "var(--foreground)", 
+        background: isLightMode ? "#f7f7f7" : undefined,
+        backgroundImage: isLightMode ? "none" : undefined
+      }}
+    >
 
       <header
         className="sticky top-0 z-50 flex items-center justify-between px-5"
-        style={{ height: 44, background: "rgba(11,11,11,0.96)", borderBottom: BORDER, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
+        style={{ height: 44, background: isLightMode ? "rgba(255,255,255,0.96)" : "rgba(11,11,11,0.96)", borderBottom: BORDER, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
       >
-        <span className="font-mono text-[11px] font-semibold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.9)" }}>
+        <span className="font-mono text-[11px] font-semibold uppercase tracking-widest" style={{ color: "var(--text-primary)" }}>
           {siteConfig.personal.initials}
         </span>
-        <span className="font-mono text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>
-          {time}
-        </span>
+        <div className="flex items-center gap-4">
+          <button onClick={() => setIsLightMode(!isLightMode)} className="focus:outline-none flex items-center justify-center" style={{ color: "var(--text-primary)" }}>
+            {isLightMode ? <Moon size={14} /> : <Sun size={14} />}
+          </button>
+          <span className="font-mono text-[11px]" style={{ color: "var(--text-muted)" }}>
+            {time}
+          </span>
+        </div>
       </header>
 
       <nav
         className="sticky z-40 flex items-center gap-5 px-5 overflow-x-auto"
-        style={{ top: 44, height: 36, background: "rgba(11,11,11,0.96)", borderBottom: BORDER, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", scrollbarWidth: "none", overscrollBehaviorX: "contain" }}
+        style={{ top: 44, height: 36, background: isLightMode ? "rgba(255,255,255,0.96)" : "rgba(11,11,11,0.96)", borderBottom: BORDER, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", scrollbarWidth: "none", overscrollBehaviorX: "contain" }}
       >
         {NAV.map(({ id, label }) => (
           <button
@@ -80,8 +98,8 @@ export default function MobileLayout() {
             onClick={() => scrollTo(id)}
             className="font-mono text-[10px] uppercase tracking-widest whitespace-nowrap transition-colors pb-px"
             style={{
-              color: activeId === id ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.28)",
-              borderBottom: activeId === id ? "1px solid rgba(255,255,255,0.5)" : "1px solid transparent",
+              color: activeId === id ? "var(--text-primary)" : "var(--text-muted)",
+              borderBottom: activeId === id ? `1px solid var(--text-primary)` : "1px solid transparent",
             }}
           >
             {label}
@@ -102,7 +120,6 @@ export default function MobileLayout() {
         <Projects compact />
       </section>
 
-
       <section id="contact" style={{ borderBottom: BORDER }}>
         <Contact compact />
       </section>
@@ -112,7 +129,7 @@ export default function MobileLayout() {
       </section>
 
       <footer className="px-6 py-8 text-center">
-        <p className="font-mono text-[10px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.18)" }}>
+        <p className="font-mono text-[10px] uppercase tracking-widest" style={{ color: "var(--text-faint)" }}>
           {siteConfig.personal.fullName} · {new Date().getFullYear()}
         </p>
       </footer>
