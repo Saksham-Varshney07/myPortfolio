@@ -50,7 +50,7 @@ export default function ExperienceModal({ experience, isOpen, onClose }: Experie
           >
             {/* Header */}
             <div className="px-6 pt-6 pb-5 flex-none" style={{ borderBottom: "1px solid var(--separator)" }}>
-              <h2 className="text-[18px] font-semibold text-white mb-1">
+              <h2 className="text-[18px] font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
                 {experience.role}
               </h2>
               <p className="font-mono text-[11px] uppercase tracking-[0.1em]" style={{ color: "var(--text-secondary)" }}>
@@ -63,7 +63,8 @@ export default function ExperienceModal({ experience, isOpen, onClose }: Experie
               {/* Tech */}
               <div>
                 <p
-                  className="font-mono text-[10px] uppercase tracking-[0.12em] mb-2 text-white/60"
+                  className="font-mono text-[10px] uppercase tracking-[0.12em] mb-2"
+                  style={{ color: "var(--text-muted)" }}
                 >
                   Stack
                 </p>
@@ -75,7 +76,8 @@ export default function ExperienceModal({ experience, isOpen, onClose }: Experie
               {/* Achievements */}
               <div>
                 <p
-                  className="font-mono text-[10px] uppercase tracking-[0.12em] mb-3 text-white/60"
+                  className="font-mono text-[10px] uppercase tracking-[0.12em] mb-3"
+                  style={{ color: "var(--text-muted)" }}
                 >
                   Key work
                 </p>
@@ -83,7 +85,8 @@ export default function ExperienceModal({ experience, isOpen, onClose }: Experie
                   {experience.achievements.map((a, i) => (
                     <li key={i} className="flex items-start gap-3">
                       <span
-                        className="font-mono text-[10px] flex-none pt-[3px] text-white/60"
+                        className="font-mono text-[10px] flex-none pt-[3px]"
+                        style={{ color: "var(--text-muted)" }}
                       >
                         {String(i + 1).padStart(2, "0")}
                       </span>

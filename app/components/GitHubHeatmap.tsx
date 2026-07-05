@@ -68,10 +68,12 @@ export default function GitHubHeatmap() {
     }
   }
 
+  const displayWeeks = weeks.slice(-29)
+
   let monthPositions: { label: string; col: number }[] = []
-  if (weeks.length > 0) {
+  if (displayWeeks.length > 0) {
     let lastMonth = -1
-    weeks.forEach((week, col) => {
+    displayWeeks.forEach((week, col) => {
       const firstValid = week.find((d) => d !== null)
       if (firstValid) {
         const month = new Date(firstValid.date).getMonth()
@@ -114,8 +116,8 @@ export default function GitHubHeatmap() {
       className="relative select-none"
       style={
         isTetrisMode 
-          ? { marginRight: 351, marginTop: -255, zIndex: 5 } 
-          : { marginRight: 0, zIndex: 5 } 
+          ? { width: 409, marginRight: 351, marginTop: -255, zIndex: 5 } 
+          : { width: 409, marginRight: 0, zIndex: 5 } 
       }
     >
       <div className="widget-handle" onPointerDown={(e) => dragControls.start(e)}>
@@ -123,7 +125,7 @@ export default function GitHubHeatmap() {
       </div>
 
       <div className="widget-body px-4 pt-3 pb-3">
-        <div className="flex items-center justify-between mb-2.5 gap-8">
+        <div className="flex flex-wrap items-center justify-between mb-2.5 gap-2">
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5">
               <Github size={11} style={{ color: "var(--text-muted)" }} />
@@ -145,7 +147,7 @@ export default function GitHubHeatmap() {
                 className="text-[9px] px-2 py-0.5 rounded-sm font-mono transition-colors hover:opacity-80 cursor-pointer"
                 style={{ background: "var(--accent-subtle)", color: "var(--accent)", border: "1px solid var(--accent-subtle)" }}
               >
-                Love GitHub streaks? Play Tetris
+                Play Tetris
               </button>
             )}
           </div>
@@ -158,11 +160,11 @@ export default function GitHubHeatmap() {
 
         {isTetrisMode ? (
           <TetrisGame />
-        ) : weeks.length === 0 ? (
+        ) : displayWeeks.length === 0 ? (
           <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>No data</div>
         ) : (
           <div>
-            <div style={{ position: "relative", height: 14, marginBottom: 2, width: weeks.length * colWidth }}>
+            <div style={{ position: "relative", height: 14, marginBottom: 2, width: displayWeeks.length * colWidth }}>
               {monthPositions.map(({ label, col }) => (
                 <span
                   key={`${label}-${col}`}
@@ -180,7 +182,7 @@ export default function GitHubHeatmap() {
             </div>
 
             <div style={{ display: "flex", gap: GAP }}>
-              {weeks.map((week, wi) => (
+              {displayWeeks.map((week, wi) => (
                 <div key={wi} style={{ display: "flex", flexDirection: "column", gap: GAP }}>
                   {week.map((day, di) => (
                     <div
