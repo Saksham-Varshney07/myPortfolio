@@ -1,14 +1,11 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Download, MapPin, Mail, Github, Twitter } from "lucide-react"
+import { Download } from "lucide-react"
 import { siteConfig } from "@/config/siteConfig"
-import { skills } from "@/config/skills"
-import { resumeExperience as experience, education } from "@/config/experience"
-import { resumeProjects as projects } from "@/config/projects"
 
 export default function Resume({ compact = false }: { compact?: boolean }) {
-  const { personal, social, contact, resumeLink } = siteConfig
+  const { resumeLink } = siteConfig
 
   return (
     <motion.div
@@ -36,6 +33,7 @@ export default function Resume({ compact = false }: { compact?: boolean }) {
 
       <div className="w-full flex justify-center">
         {/* Make sure to upload your resume image to public/SakshamVarshney.png */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/SakshamVarshney.png"
           alt="Resume"

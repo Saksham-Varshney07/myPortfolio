@@ -139,6 +139,7 @@ export default function ThemeWidget() {
         audioRef.current.currentTime = 0;
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTheme.audio]);
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -335,6 +336,7 @@ export default function ThemeWidget() {
                 padding: "4px"
               }}
             >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/bg/barcelona.af4e5453.png" alt="FCB" className="w-full h-full object-contain drop-shadow-md" />
               <span className="custom-tooltip-bottom absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] font-mono rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
                 Visca el Barça
@@ -363,6 +365,7 @@ export default function ThemeWidget() {
                 padding: "4px"
               }}
             >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img 
                 src="/bg/spideylogo.png" 
                 alt="Spider-Man" 

@@ -91,7 +91,7 @@ export default function Desktop() {
         setWindowOrder((p) => [...p.filter((w) => w !== wid), wid])
       }
     },
-    [openWindows, minimizedWindows, focusedWindow, focusWindow, closeWindow, minimizeWindow]
+    [openWindows, minimizedWindows, focusedWindow, focusWindow, minimizeWindow]
   )
 
   const getZIndex = (id: WindowId) => {
