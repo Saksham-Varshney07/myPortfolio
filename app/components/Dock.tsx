@@ -6,6 +6,7 @@ import { Github, Linkedin } from "lucide-react"
 import { SiLeetcode } from "react-icons/si"
 import { siteConfig } from "@/config/siteConfig"
 import { windows } from "@/config/windows"
+import { playClickSound } from "@/lib/sound"
 
 function XIcon({ size = 20 }: { size?: number }) {
   return (
@@ -90,7 +91,10 @@ function DockIcon({
         transition={{ duration: 0.15 }}
         className="rounded-xl flex items-center justify-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
         whileTap={{ scale: 0.88 }}
-        onClick={onActivate}
+        onClick={() => {
+          playClickSound()
+          onActivate()
+        }}
         onHoverStart={() => setHovered(true)}
         onHoverEnd={() => setHovered(false)}
         onFocus={() => setHovered(true)}

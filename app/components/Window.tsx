@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef } from "react"
 import { motion, AnimatePresence, useDragControls } from "framer-motion"
 import { Minus, Square, X } from "lucide-react"
+import { playClickSound } from "@/lib/sound"
 
 interface WindowProps {
   windowId?: string
@@ -142,7 +143,7 @@ export default function Window({
                   style={{ color: "inherit" }}
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--window-border-focused)"; e.currentTarget.style.color = "var(--text-primary)"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "inherit"; }}
-                  onClick={(e) => { e.stopPropagation(); onMinimize?.(); }}
+                  onClick={(e) => { e.stopPropagation(); playClickSound(); onMinimize?.(); }}
                   onPointerDown={(e) => e.stopPropagation()}
                 >
                   <Minus size={15} strokeWidth={1.5} />
@@ -166,7 +167,7 @@ export default function Window({
                   style={{ color: "inherit" }}
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#E81123"; e.currentTarget.style.color = "#ffffff"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "inherit"; }}
-                  onClick={(e) => { e.stopPropagation(); onClose() }}
+                  onClick={(e) => { e.stopPropagation(); playClickSound(); onClose() }}
                   onPointerDown={(e) => e.stopPropagation()}
                 >
                   <X size={16} strokeWidth={1.5} />

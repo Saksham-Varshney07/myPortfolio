@@ -22,6 +22,12 @@ export const projects: ProjectsConfig = {
       link: "https://github.com/Saksham-Varshney07/TubeTrail-YoutubePlaylistTracker",
     },
     {
+      title: "VisionForge",
+      description: "A real-time product recognition system built with YOLOv8, Flask, and React. Train custom object detection models directly from your browser by uploading product videos.",
+      tech: ["YOLOv8", "Flask", "React", "TypeScript", "OpenCV"],
+      link: "https://github.com/Saksham-Varshney07/VisionForge",
+    },
+    {
       title: "ClaimMax",
       description: "An automated verification pipeline using OpenCV and ML to detect fraudulent ration cards.",
       tech: ["Python", "Machine Learning", "OpenCV"],
@@ -40,6 +46,10 @@ export const resumeProjects: ResumeProjectItem[] = [
   {
     name: "TubeTrail",
     desc: "Developed a MutationObserver-based DOM engine for 60 FPS UI sync on YouTube. Implemented Firebase two-way cloud sync and an anti-cheat tracking system.",
+  },
+  {
+    name: "VisionForge",
+    desc: "Engineered a dynamic training pipeline that auto-annotates video frames to retrain custom YOLOv8 models. Integrated a real-time tracking dashboard using WebSockets and React.",
   },
   {
     name: "ClaimMax",

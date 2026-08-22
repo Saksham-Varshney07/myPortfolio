@@ -63,7 +63,7 @@ export const siteConfig: SiteConfig = {
     lastName: "Varshney",
     fullName: "Saksham Varshney",
     initials: "SV",
-    role: "AI · Machine Learning · Deep Learning ·  RLHF",
+    role: "AI · Machine Learning · Full Stack ·  RLHF",
     shortRole: "Full-Stack Software Engineer",
     tagline:
       "Bridging the gap between cutting-edge AI and seamless web experiences. Specializing in Machine Learning, LLM alignment, and highly scalable full-stack architectures.",
