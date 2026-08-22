@@ -4,7 +4,7 @@ export const playClickSound = () => {
   if (typeof window === "undefined") return;
   
   if (!clickAudio) {
-    clickAudio = new Audio("/click.mp3");
+    clickAudio = new Audio("/Click.mp3");
     clickAudio.volume = 0.4;
   }
   
