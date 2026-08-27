@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { createPortal } from "react-dom"
 import { motion, useDragControls } from "framer-motion"
 import { Shuffle, Sun, Moon, Undo2, Volume2, VolumeX } from "lucide-react"
 
@@ -12,6 +13,7 @@ type ThemeState = {
   label?: string;
   audio?: string;
   audioStartTime?: number;
+  video?: string;
 }
 
 function applyThemeVars(vars: Record<string, string> | null) {
@@ -203,13 +205,35 @@ export default function ThemeWidget() {
   };
 
   return (
-    <motion.div
-      drag
-      dragControls={dragControls}
-      dragListener={false}
-      dragMomentum={false}
-      style={{ position: "relative", zIndex: 5, width: 340 }}
-    >
+    <>
+      {typeof document !== "undefined" && currentTheme.video && createPortal(
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          src={currentTheme.video}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            objectFit: "cover",
+            zIndex: -1,
+            filter: "blur(6px) brightness(0.6)",
+            pointerEvents: "none"
+          }}
+        />,
+        document.body
+      )}
+      <motion.div
+        drag
+        dragControls={dragControls}
+        dragListener={false}
+        dragMomentum={false}
+        style={{ position: "relative", zIndex: 5, width: 340 }}
+      >
       {/* Drag handle */}
       <div
         className="flex items-center justify-center cursor-grab active:cursor-grabbing"
@@ -376,11 +400,40 @@ export default function ThemeWidget() {
                 Spider-Tingle
               </span>
             </button>
+            <button
+              onClick={() => setTheme({
+                type: "predefined",
+                label: "Tokyo",
+                audio: "/bgm/tokyo.mp3",
+                audioStartTime: 0,
+                video: "/bg/Tunnel Drift live wallpaper.mp4",
+                vars: {
+                  ...darkThemeVars,
+                  "--bg-base": "rgba(0,0,0,0.2)",
+                  "--wallpaper-bg": "transparent",
+                  "--wallpaper-opacity": "1"
+                }
+              })}
+              className="group relative overflow-visible w-10 h-10 rounded-md transition-all cursor-pointer flex items-center justify-center font-mono text-[9px]"
+              style={{
+                background: currentTheme.label === "Tokyo" ? "var(--accent-subtle)" : "var(--item-separator)",
+                color: currentTheme.label === "Tokyo" ? "var(--accent)" : "var(--text-secondary)",
+                border: currentTheme.label === "Tokyo" ? "1px solid var(--accent-subtle)" : "1px solid var(--window-border-unfocused)",
+                padding: "4px"
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/bg/tokyodriftlogo.png" alt="Tokyo Drift" className="w-[140%] h-[140%] max-w-none object-contain drop-shadow-md" />
+              <span className="custom-tooltip-bottom absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] font-mono rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                Tokyo Drift
+              </span>
+            </button>
           </div>
         </div>
 
         <audio ref={audioRef} loop style={{ display: 'none' }} />
       </div>
-    </motion.div>
+      </motion.div>
+    </>
   )
 }
