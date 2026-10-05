@@ -13,6 +13,7 @@ import CalendarWidget from "./widgets/CalendarWidget"
 // import VisitorWidget from "./widgets/VisitorWidget"
 import ThemeWidget from "./widgets/ThemeWidget"
 import { ContextMenu, MenuItem } from "./ContextMenu"
+import BootLoadingScreen from "./BootLoadingScreen"
 import { siteConfig } from "@/config/siteConfig"
 import { windows, type WindowId } from "@/config/windows"
 
@@ -20,10 +21,11 @@ import { windows, type WindowId } from "@/config/windows"
 const KONAMI = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"]
 
 export default function Desktop() {
+  const [isBootLoading, setIsBootLoading] = useState(true)
   const [isMobile, setIsMobile] = useState<boolean | null>(null)
-  const [openWindows, setOpenWindows] = useState<WindowId[]>(["about"])
+  const [openWindows, setOpenWindows] = useState<WindowId[]>([])
   const [minimizedWindows, setMinimizedWindows] = useState<WindowId[]>([])
-  const [windowOrder, setWindowOrder] = useState<WindowId[]>(["about"])
+  const [windowOrder, setWindowOrder] = useState<WindowId[]>([])
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
   const [showAboutOverlay, setShowAboutOverlay] = useState(false)
   const [konamiActive, setKonamiActive] = useState(false)
@@ -106,20 +108,37 @@ export default function Desktop() {
   ]
 
   if (isMobile === null) return null
-  if (isMobile) return <MobileLayout />
 
   const focusedTitle = focusedWindow ? windows.find((w) => w.id === focusedWindow)?.title ?? null : null
 
   return (
-    <div
-      className="fixed inset-0 overflow-hidden desktop-bg"
-      onContextMenu={(e) => {
-        if ((e.target as Element).closest("[data-mac-window]")) return
-        e.preventDefault()
-        setContextMenu({ x: e.clientX, y: e.clientY })
-      }}
-      onClick={() => setContextMenu(null)}
-    >
+    <>
+      <AnimatePresence>
+        {isBootLoading && (
+          <BootLoadingScreen
+            onComplete={() => {
+              setIsBootLoading(false)
+              setTimeout(() => {
+                setOpenWindows(["about"])
+                setWindowOrder(["about"])
+              }, 120)
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {isMobile ? (
+        <MobileLayout />
+      ) : (
+        <div
+          className="fixed inset-0 overflow-hidden desktop-bg"
+          onContextMenu={(e) => {
+            if ((e.target as Element).closest("[data-mac-window]")) return
+            e.preventDefault()
+            setContextMenu({ x: e.clientX, y: e.clientY })
+          }}
+          onClick={() => setContextMenu(null)}
+        >
       <div className="album-wallpaper" aria-hidden="true" />
 
       <MenuBar focusedApp={focusedTitle} />
@@ -263,6 +282,8 @@ export default function Desktop() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+        </div>
+      )}
+    </>
   )
 }
