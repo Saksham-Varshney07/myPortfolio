@@ -16,5 +16,5 @@ export const skills: Skills = {
   "Development": ["HTML", "CSS", "NodeJS", "ExpressJS", "ReactJS","Git"],
   "Databases":   ["PostgreSQL", "MySQL", "MongoDB", "Firebase (Firestore)", "SQL"],
   "AI/ML":       ["PyTorch", "Pandas", "NumPy", "Machine Learning"],
-  "Others":      ["DSA", "Computer Networks", "DBMS", "Cybersecurity", "Computer Architecture"],
+  "Others":      ["DSA", "Computer Networks", "DBMS", "Cybersecurity"],
 }
