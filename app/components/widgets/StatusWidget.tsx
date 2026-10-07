@@ -4,10 +4,21 @@ import { motion, useDragControls } from "framer-motion"
 import { Send } from "lucide-react"
 import { status } from "@/config/status"
 
+import { useWidgetResize } from "./useWidgetResize"
+import WidgetResizeHandles from "./WidgetResizeHandles"
+
 const STATUS = { available: status.available, label: status.label }
 
 export default function StatusWidget({ onContactClick }: { onContactClick?: () => void }) {
   const dragControls = useDragControls()
+  const { width, height, handleResizeStart } = useWidgetResize({
+    initialWidth: 232,
+    initialHeight: 145,
+    minWidth: 195,
+    minHeight: 115,
+    maxWidth: 450,
+    maxHeight: 350,
+  })
 
   return (
     <motion.div
@@ -17,8 +28,9 @@ export default function StatusWidget({ onContactClick }: { onContactClick?: () =
       dragMomentum={false}
       dragElastic={0}
       className="relative select-none group"
-      style={{ zIndex: 5, width: 232 }}
+      style={{ zIndex: 5, width, height }}
     >
+      <WidgetResizeHandles onResizeStart={handleResizeStart} />
       {/* Siri-style animated neon glow (outer blur) */}
       <div className="absolute -inset-[2px] rounded-[10px] z-0 pointer-events-none blur-[10px] opacity-75 overflow-hidden">
         <div 
@@ -48,19 +60,19 @@ export default function StatusWidget({ onContactClick }: { onContactClick?: () =
       {/* Actual Content Layers */}
       <div className="relative z-10 flex flex-col h-full rounded-[8px] overflow-hidden">
         <div 
-          className="widget-handle" 
+          className="widget-handle flex-none flex items-center justify-center cursor-grab active:cursor-grabbing select-none" 
           onPointerDown={(e) => dragControls.start(e)}
-          style={{ border: "none", background: "transparent" }}
+          style={{ border: "none", background: "transparent", height: 22 }}
         >
           <div style={{ width: 24, height: 2, borderRadius: 1, background: "var(--text-faint)" }} />
         </div>
 
         <div 
-          className="widget-body px-4 pb-4 pt-1"
+          className="widget-body flex-1 min-h-0 flex flex-col justify-between overflow-y-auto mac-scrollbar px-4 pb-3 pt-1"
           style={{ border: "none", background: "transparent" }}
         >
           <div
-            className="flex items-center justify-between pb-2.5 mb-3"
+            className="flex items-center justify-between pb-2 mb-2 flex-none"
             style={{ borderBottom: "1px solid var(--separator)" }}
           >
             <div className="flex items-center gap-2">
@@ -90,7 +102,7 @@ export default function StatusWidget({ onContactClick }: { onContactClick?: () =
             )}
           </div>
 
-          <p className="text-[11px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-[11px] leading-relaxed break-words" style={{ color: "var(--text-secondary)" }}>
             Actively looking for internships and full-time roles in <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>Software Development</span> and <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>AI/ML</span>.
           </p>
         </div>

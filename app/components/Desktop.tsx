@@ -17,11 +17,15 @@ import BootLoadingScreen from "./BootLoadingScreen"
 import { SolaceFieldShader } from "./solace-field-shader"
 import { siteConfig } from "@/config/siteConfig"
 import { windows, type WindowId } from "@/config/windows"
+import PlainPortfolio from "./plain/PlainPortfolio"
+import AITransitionOverlay from "./plain/AITransitionOverlay"
 
 
 const KONAMI = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"]
 
 export default function Desktop() {
+  const [viewMode, setViewMode] = useState<"desktop" | "plain">("desktop")
+  const [isAITransitioning, setIsAITransitioning] = useState(false)
   const [isBootLoading, setIsBootLoading] = useState(true)
   const [isMobile, setIsMobile] = useState<boolean | null>(null)
   const [openWindows, setOpenWindows] = useState<WindowId[]>([])
@@ -108,6 +112,36 @@ export default function Desktop() {
     { label: "Contact", onClick: () => toggleWindow("contact") },
   ]
 
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("portfolio-view-mode")
+      if (saved === "plain" || saved === "desktop") {
+        setViewMode(saved)
+      }
+    } catch {}
+  }, [])
+
+  const handleSwitchMode = useCallback((targetMode: "desktop" | "plain") => {
+    if (targetMode === viewMode) return
+
+    if (targetMode === "plain") {
+      setIsAITransitioning(true)
+    } else {
+      setViewMode("desktop")
+      try {
+        localStorage.setItem("portfolio-view-mode", "desktop")
+      } catch {}
+    }
+  }, [viewMode])
+
+  const handleAITransitionComplete = useCallback(() => {
+    setIsAITransitioning(false)
+    setViewMode("plain")
+    try {
+      localStorage.setItem("portfolio-view-mode", "plain")
+    } catch {}
+  }, [])
+
   if (isMobile === null) return null
 
   const focusedTitle = focusedWindow ? windows.find((w) => w.id === focusedWindow)?.title ?? null : null
@@ -128,8 +162,16 @@ export default function Desktop() {
         )}
       </AnimatePresence>
 
-      {isMobile ? (
-        <MobileLayout />
+      <AnimatePresence>
+        {isAITransitioning && (
+          <AITransitionOverlay onComplete={handleAITransitionComplete} />
+        )}
+      </AnimatePresence>
+
+      {viewMode === "plain" ? (
+        <PlainPortfolio onSwitchMode={handleSwitchMode} />
+      ) : isMobile ? (
+        <MobileLayout onSwitchMode={handleSwitchMode} />
       ) : (
         <div
           className="fixed inset-0 overflow-hidden desktop-bg"
@@ -154,7 +196,10 @@ export default function Desktop() {
 
           <div className="album-wallpaper" aria-hidden="true" />
 
-          <MenuBar focusedApp={focusedTitle} />
+          <MenuBar
+            focusedApp={focusedTitle}
+            onModeChange={handleSwitchMode}
+          />
 
           {windows.map((win) => {
             const Section = win.component

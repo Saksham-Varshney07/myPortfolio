@@ -1,6 +1,8 @@
 "use client"
 
 import { motion, useDragControls } from "framer-motion"
+import { useWidgetResize } from "./useWidgetResize"
+import WidgetResizeHandles from "./WidgetResizeHandles"
 
 interface Book {
   title: string
@@ -39,18 +41,25 @@ const books: Book[] = [
 ]
 
 // ─── UI Sizing Config ──────────────────────────────────────────────────────────
-// Easily adjust font sizes and dimensions for the Reading List widget here:
 export const READING_CONFIG = {
   bookTitleSize: 12,     // Font size for book titles in pixels (e.g. 8, 9, 10, 11)
   authorSize: 8,         // Font size for author & genre in pixels (e.g. 7, 8, 9)
   headerSize: 9,         // Font size for "READING LIST .." header in pixels
   badgeSize: 7,          // Font size for "reading.." status badge in pixels
   widgetWidth: 288,      // Width of the reading widget card in pixels
-  widgetHeight: 300,     // Height of the reading widget card in pixels (increase or decrease to taste)
+  widgetHeight: 300,     // Height of the reading widget card in pixels
 }
 
 export default function ReadingWidget() {
   const dragControls = useDragControls()
+  const { width, height, handleResizeStart } = useWidgetResize({
+    initialWidth: READING_CONFIG.widgetWidth,
+    initialHeight: READING_CONFIG.widgetHeight,
+    minWidth: 220,
+    minHeight: 160,
+    maxWidth: 550,
+    maxHeight: 650,
+  })
 
   return (
     <motion.div
@@ -62,13 +71,14 @@ export default function ReadingWidget() {
       className="relative select-none"
       style={{
         zIndex: 5,
-        width: READING_CONFIG.widgetWidth,
-        height: READING_CONFIG.widgetHeight,
+        width,
+        height,
       }}
     >
-      <div className="retroui-card overflow-hidden flex flex-col h-full">
+      <WidgetResizeHandles onResizeStart={handleResizeStart} />
+      <div className="retroui-card overflow-hidden flex flex-col h-full w-full">
         <div
-          className="flex-none flex items-center justify-center cursor-grab active:cursor-grabbing"
+          className="flex-none flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
           style={{ height: 22, background: "var(--drag-handle-bg)", borderBottom: "1px solid var(--separator)" }}
           onPointerDown={(e) => dragControls.start(e)}
         >
@@ -106,16 +116,16 @@ export default function ReadingWidget() {
                   borderBottom: i === books.length - 1 ? "none" : "1px solid var(--separator)"
                 }}
               >
-                <div className="flex items-center justify-between gap-1.5 mb-0.5">
+                <div className="flex items-center justify-between gap-1.5 mb-0.5 min-w-0">
                   <h3
-                    className="font-minecraft leading-snug transition-colors duration-200 cursor-default truncate text-[var(--text-primary)] group-hover:text-[var(--accent)]"
+                    className="font-minecraft leading-snug transition-colors duration-200 cursor-default truncate min-w-0 flex-1 text-[var(--text-primary)] group-hover:text-[var(--accent)]"
                     style={{ fontSize: `${READING_CONFIG.bookTitleSize}px` }}
                   >
                     {book.title}
                   </h3>
                   {book.status === "reading" && (
                     <span
-                      className="flex-none inline-flex items-center gap-1 font-minecraft px-1.5 py-0.5 rounded-full font-medium"
+                      className="flex-none shrink-0 inline-flex items-center gap-1 font-minecraft px-1.5 py-0.5 rounded-full font-medium"
                       style={{
                         background: "var(--accent-subtle)",
                         color: "var(--indicator-color)",

@@ -3,10 +3,21 @@
 import { useMemo } from "react"
 import { motion, useDragControls } from "framer-motion"
 
+import { useWidgetResize } from "./useWidgetResize"
+import WidgetResizeHandles from "./WidgetResizeHandles"
+
 const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"]
 
 export default function CalendarWidget() {
   const dragControls = useDragControls()
+  const { width, height, handleResizeStart } = useWidgetResize({
+    initialWidth: 258,
+    initialHeight: 230,
+    minWidth: 200,
+    minHeight: 175,
+    maxWidth: 450,
+    maxHeight: 500,
+  })
 
   const { year, today, cells, monthName } = useMemo(() => {
     const now = new Date()
@@ -31,19 +42,20 @@ export default function CalendarWidget() {
       dragMomentum={false}
       dragElastic={0}
       className="relative select-none"
-      style={{ zIndex: 5, width: 258 }}
+      style={{ zIndex: 5, width, height }}
     >
-      <div className="retroui-card overflow-hidden">
+      <WidgetResizeHandles onResizeStart={handleResizeStart} />
+      <div className="retroui-card overflow-hidden flex flex-col h-full w-full">
         <div
-          className="flex items-center justify-center cursor-grab active:cursor-grabbing"
+          className="flex-none flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
           style={{ height: 22, background: "var(--drag-handle-bg)", borderBottom: "1px solid var(--separator)" }}
           onPointerDown={(e) => dragControls.start(e)}
         >
           <div style={{ width: 24, height: 2, borderRadius: 1, background: "var(--text-faint)" }} />
         </div>
 
-        <div className="px-3 pt-3 pb-3">
-          <div className="flex items-baseline justify-between mb-3">
+        <div className="flex-1 min-h-0 flex flex-col px-3 pt-2.5 pb-2.5 overflow-hidden">
+          <div className="flex-none flex items-baseline justify-between mb-2">
             <p className="text-[12px] font-semibold" style={{ color: "var(--text-primary)" }}>
               {monthName}
             </p>
@@ -52,7 +64,7 @@ export default function CalendarWidget() {
             </p>
           </div>
 
-          <div className="grid grid-cols-7 mb-1">
+          <div className="flex-none grid grid-cols-7 mb-1">
             {DAY_LABELS.map((d, i) => (
               <div
                 key={i}
@@ -64,13 +76,12 @@ export default function CalendarWidget() {
             ))}
           </div>
 
-          <div className="grid grid-cols-7 gap-y-0.5">
+          <div className="flex-1 min-h-0 grid grid-cols-7 gap-y-0.5 gap-x-0.5 items-center content-stretch">
             {cells.map((day, i) => (
               <div
                 key={i}
-                className="flex items-center justify-center font-mono text-[10px]"
+                className="flex items-center justify-center font-mono text-[10px] w-full h-full max-h-[26px] min-h-[16px] transition-colors"
                 style={{
-                  height: 22,
                   borderRadius: 4,
                   background: day === today ? "var(--accent-subtle)" : "transparent",
                   color: day === today

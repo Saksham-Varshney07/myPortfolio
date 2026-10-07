@@ -1,10 +1,12 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { createPortal } from "react-dom"
+import { createPortal, flushSync } from "react-dom"
 import { motion, useDragControls } from "framer-motion"
 import { Shuffle, Sun, Moon, Undo2, Volume2, VolumeX } from "lucide-react"
 import { Button } from "pixel-retroui"
+import { useWidgetResize } from "./useWidgetResize"
+import WidgetResizeHandles from "./WidgetResizeHandles"
 
 const LS_KEY = "portfolio-custom-theme"
 
@@ -211,11 +213,51 @@ export const THEME_BUTTON_CONFIG = {
   gap: 20,          // Spacing between the buttons in pixels
 };
 
+function triggerRippleWave(origin: { x: number; y: number }, color?: string) {
+  if (typeof document === "undefined") return;
+  const ripple = document.createElement("div");
+  const maxDim = Math.max(window.innerWidth, window.innerHeight);
+  const size = maxDim * 2.6;
+  ripple.style.position = "fixed";
+  ripple.style.left = `${origin.x}px`;
+  ripple.style.top = `${origin.y}px`;
+  ripple.style.width = "0px";
+  ripple.style.height = "0px";
+  ripple.style.borderRadius = "50%";
+  ripple.style.transform = "translate(-50%, -50%)";
+  ripple.style.pointerEvents = "none";
+  ripple.style.zIndex = "999999";
+  ripple.style.boxShadow = `0 0 35px 8px ${color || "rgba(255,255,255,0.7)"}, inset 0 0 20px ${color || "rgba(255,255,255,0.4)"}`;
+  ripple.style.border = `2.5px solid ${color || "rgba(255,255,255,0.85)"}`;
+  document.body.appendChild(ripple);
+
+  const anim = ripple.animate(
+    [
+      { width: "0px", height: "0px", opacity: 0.95 },
+      { width: `${size}px`, height: `${size}px`, opacity: 0 }
+    ],
+    {
+      duration: 650,
+      easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+    }
+  );
+  anim.onfinish = () => ripple.remove();
+}
+
 export default function ThemeWidget() {
-  const [history, setHistory] = useState<ThemeState[]>([{ type: "dark" }]);
+  const [history, setHistory] = useState<ThemeState[]>([{ type: "light", vars: retroThemeVars }]);
   const dragControls = useDragControls();
   const audioRef = useRef<HTMLAudioElement>(null);
   const [volume, setVolume] = useState(0.5);
+
+  const { width, height, handleResizeStart } = useWidgetResize({
+    initialWidth: 340,
+    initialHeight: 285,
+    minWidth: 260,
+    minHeight: 165,
+    maxWidth: 550,
+    maxHeight: 600,
+  });
 
   const currentTheme = history[history.length - 1];
 
@@ -249,11 +291,15 @@ export default function ThemeWidget() {
   };
 
   useEffect(() => {
-    applyThemeVars(darkThemeVars, "dark", false);
+    applyThemeVars(retroThemeVars, "light", false);
     localStorage.removeItem(LS_KEY);
   }, []);
 
-  const applyWithTransition = (action: () => void, origin?: { x: number; y: number }) => {
+  const applyWithTransition = (action: () => void, origin?: { x: number; y: number }, rippleColor?: string) => {
+    if (origin) {
+      triggerRippleWave(origin, rippleColor);
+    }
+
     if (typeof document === "undefined" || !document.startViewTransition) {
       action();
       return;
@@ -267,7 +313,9 @@ export default function ThemeWidget() {
     );
 
     const transition = document.startViewTransition(() => {
-      action();
+      flushSync(() => {
+        action();
+      });
     });
 
     transition.ready.then(() => {
@@ -287,12 +335,12 @@ export default function ThemeWidget() {
     }).catch(() => {});
   };
 
-  const setTheme = (theme: ThemeState, origin?: { x: number; y: number }) => {
+  const setTheme = (theme: ThemeState, origin?: { x: number; y: number }, rippleColor?: string) => {
     if (theme.type === "predefined") {
       applyWithTransition(() => {
         setHistory(prev => [...prev, theme]);
         applyThemeVars(theme.vars || null, "predefined", !!theme.video);
-      }, origin);
+      }, origin, rippleColor);
       return;
     }
 
@@ -302,10 +350,10 @@ export default function ThemeWidget() {
       else if (theme.type === "dark") applyThemeVars(darkThemeVars, "dark", false);
       else if (theme.type === "custom") applyThemeVars(theme.vars || null, "custom", false);
       else applyThemeVars(darkThemeVars, "dark", false);
-    }, origin);
+    }, origin, rippleColor);
   };
 
-  const undo = (origin?: { x: number; y: number }) => {
+  const undo = (origin?: { x: number; y: number }, rippleColor?: string) => {
     if (history.length > 1) {
       applyWithTransition(() => {
         const newHistory = history.slice(0, -1);
@@ -316,7 +364,7 @@ export default function ThemeWidget() {
         else if (prevTheme.type === "custom") applyThemeVars(prevTheme.vars || null, "custom", false);
         else if (prevTheme.type === "predefined") applyThemeVars(prevTheme.vars || null, "predefined", !!prevTheme.video);
         else applyThemeVars(darkThemeVars, "dark", false);
-      }, origin);
+      }, origin, rippleColor);
     }
   };
 
@@ -348,12 +396,15 @@ export default function ThemeWidget() {
         dragControls={dragControls}
         dragListener={false}
         dragMomentum={false}
-        style={{ position: "relative", zIndex: 5, width: 340 }}
+        dragElastic={0}
+        className="relative select-none"
+        style={{ zIndex: 5, width, height }}
       >
-        <div className="retroui-card overflow-hidden">
+        <WidgetResizeHandles onResizeStart={handleResizeStart} />
+        <div className="retroui-card overflow-hidden flex flex-col h-full w-full">
           {/* Drag handle */}
           <div
-            className="flex items-center justify-center cursor-grab active:cursor-grabbing"
+            className="flex-none flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
             style={{
               height: 22,
               background: "var(--drag-handle-bg)",
@@ -366,11 +417,7 @@ export default function ThemeWidget() {
 
           {/* Widget body */}
           <div
-            className="flex flex-col justify-between"
-            style={{
-              padding: "16px",
-              height: "auto"
-            }}
+            className="flex-1 min-h-0 overflow-y-auto mac-scrollbar flex flex-col justify-between p-3.5"
           >
             <div className="flex items-center justify-between">
               <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--text-secondary)" }}>
@@ -394,7 +441,7 @@ export default function ThemeWidget() {
                 onClick={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   const origin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-                  setTheme({ type: "custom", vars: generateRandomDarkTheme() }, origin);
+                  setTheme({ type: "custom", vars: generateRandomDarkTheme() }, origin, "rgba(255, 255, 255, 0.85)");
                 }}
                 className="!m-0 w-full flex items-center justify-center gap-1.5 font-minecraft uppercase tracking-wider cursor-pointer"
                 style={{
@@ -414,7 +461,7 @@ export default function ThemeWidget() {
                 onClick={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   const origin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-                  undo(origin);
+                  undo(origin, "rgba(255, 255, 255, 0.85)");
                 }}
                 disabled={history.length <= 1}
                 className="!m-0 w-full flex items-center justify-center gap-1.5 font-minecraft uppercase tracking-wider cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
@@ -437,10 +484,11 @@ export default function ThemeWidget() {
                 onClick={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   const origin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+                  const rippleColor = currentTheme.type === "dark" ? "rgba(255, 255, 255, 0.85)" : "rgba(40, 40, 40, 0.85)";
                   if (currentTheme.type === "dark") {
-                    setTheme({ type: "light", vars: retroThemeVars }, origin);
+                    setTheme({ type: "light", vars: retroThemeVars }, origin, rippleColor);
                   } else {
-                    setTheme({ type: "dark", vars: darkThemeVars }, origin);
+                    setTheme({ type: "dark", vars: darkThemeVars }, origin, rippleColor);
                   }
                 }}
                 className="!m-0 w-full flex items-center justify-center gap-1.5 font-minecraft uppercase tracking-wider cursor-pointer"
@@ -486,7 +534,7 @@ export default function ThemeWidget() {
                 )}
               </div>
 
-              <div className="flex gap-3 mt-1">
+              <div className="flex flex-wrap gap-2.5 mt-1">
                 <button
                   onClick={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
@@ -504,7 +552,7 @@ export default function ThemeWidget() {
                         "--wallpaper-brightness": "0.8",
                         "--wallpaper-saturate": "1.1"
                       }
-                    }, origin);
+                    }, origin, "rgba(219, 56, 75, 0.9)");
                   }}
                   className="group relative overflow-visible w-10 h-10 rounded-md transition-all cursor-pointer flex items-center justify-center font-mono text-[9px]"
                   style={{
@@ -537,7 +585,7 @@ export default function ThemeWidget() {
                         "--wallpaper-brightness": "0.7",
                         "--wallpaper-saturate": "1.2"
                       }
-                    }, origin);
+                    }, origin, "rgba(235, 33, 46, 0.9)");
                   }}
                   className="group relative overflow-visible w-10 h-10 rounded-md transition-all cursor-pointer flex items-center justify-center font-mono text-[9px]"
                   style={{
@@ -574,7 +622,7 @@ export default function ThemeWidget() {
                         "--wallpaper-bg": "transparent",
                         "--wallpaper-opacity": "1"
                       }
-                    }, origin);
+                    }, origin, "rgba(0, 240, 255, 0.9)");
                   }}
                   className="group relative overflow-visible w-10 h-10 rounded-md transition-all cursor-pointer flex items-center justify-center font-mono text-[9px]"
                   style={{

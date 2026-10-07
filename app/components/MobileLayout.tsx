@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Sun, Moon } from "lucide-react"
+import { Sun, Moon, FileText } from "lucide-react"
 import Hero from "./Hero"
 import Experience from "./sections/Experience"
 import Projects from "./sections/Projects"
@@ -19,7 +19,11 @@ const NAV = [
   { id: "resume",     label: "Resume" },
 ]
 
-export default function MobileLayout() {
+export default function MobileLayout({
+  onSwitchMode,
+}: {
+  onSwitchMode?: (mode: "desktop" | "plain") => void
+}) {
   const [time, setTime] = useState("")
   const [activeId, setActiveId] = useState("about")
   const [isLightMode, setIsLightMode] = useState(false)
@@ -86,8 +90,19 @@ export default function MobileLayout() {
         <span className="font-mono text-[11px] font-semibold uppercase tracking-widest" style={{ color: "var(--text-primary)" }}>
           {siteConfig.personal.initials}
         </span>
-        <div className="flex items-center gap-4">
-          <button onClick={() => setIsLightMode(!isLightMode)} className="focus:outline-none flex items-center justify-center" style={{ color: "var(--text-primary)" }}>
+        <div className="flex items-center gap-3">
+          {onSwitchMode && (
+            <button
+              onClick={() => onSwitchMode("plain")}
+              className="flex items-center justify-center w-7 h-7 rounded hover:bg-white/10 transition-colors cursor-pointer"
+              style={{ color: "var(--text-primary)" }}
+              aria-label="Switch to Plain View"
+              title="Plain View"
+            >
+              <FileText size={15} />
+            </button>
+          )}
+          <button onClick={() => setIsLightMode(!isLightMode)} className="focus:outline-none flex items-center justify-center cursor-pointer" style={{ color: "var(--text-primary)" }}>
             {isLightMode ? <Moon size={14} /> : <Sun size={14} />}
           </button>
           <span className="font-mono text-[11px]" style={{ color: "var(--text-muted)" }}>

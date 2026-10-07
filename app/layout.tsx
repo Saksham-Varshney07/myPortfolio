@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="en" data-theme="light" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body>
         <MotionConfig reducedMotion="user">
           {children}

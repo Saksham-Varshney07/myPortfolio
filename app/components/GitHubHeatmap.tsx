@@ -5,6 +5,8 @@ import { Github } from "lucide-react"
 import { motion, useDragControls } from "framer-motion"
 import { siteConfig } from "@/config/siteConfig"
 import TetrisGame from "./TetrisGame"
+import { useWidgetResize } from "./widgets/useWidgetResize"
+import WidgetResizeHandles from "./widgets/WidgetResizeHandles"
 
 export const LEVEL_COLORS = [
   "var(--heatmap-empty)",
@@ -23,13 +25,11 @@ export interface Contribution {
 // Easily adjust dimensions, grid size, and weeks shown for the GitHub widget:
 export const HEATMAP_CONFIG = {
   widgetWidth: 440,                  // Card width in pixels (increase to e.g. 450 or 480)
-  widgetHeight: undefined as number | undefined, // Card height in pixels (e.g. 180, 200), or undefined to fit content
+  widgetHeight: 200,                 // Default card height in pixels (ample room for all 7 rows + labels + padding)
   cell: 10,                          // Size of each contribution day square (e.g. 10, 11, 12)
   gap: 3,                            // Spacing between squares in pixels
   weeksCount: 29,                    // Number of weeks shown horizontally (e.g. 29, 32, 35)
 }
-
-
 
 const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
@@ -40,15 +40,47 @@ export default function GitHubHeatmap() {
   const [isTetrisMode, setIsTetrisMode] = useState(false)
   const dragControls = useDragControls()
 
+  const { width, height, handleResizeStart } = useWidgetResize({
+    initialWidth: HEATMAP_CONFIG.widgetWidth,
+    initialHeight: HEATMAP_CONFIG.widgetHeight,
+    minWidth: 260,
+    minHeight: 135,
+    maxWidth: 700,
+    maxHeight: 600,
+  })
+
   useEffect(() => {
+    // 1. Immediately hydrate from localStorage for instantaneous 0ms display
+    try {
+      const cached = localStorage.getItem("portfolio-gh-contributions")
+      if (cached) {
+        const parsed = JSON.parse(cached)
+        if (Array.isArray(parsed.contributions) && parsed.contributions.length > 0) {
+          setContributions(parsed.contributions)
+          setTotal(parsed.total ?? 0)
+          setLoaded(true)
+        }
+      }
+    } catch {}
+
+    // 2. Fetch fresh data from API
     fetch("/api/github")
       .then((r) => r.json())
       .then((d) => {
-        setContributions(d.contributions ?? [])
-        const sum = Object.values(d.total as Record<string, number>).reduce(
-          (a: number, b) => a + (b as number), 0
-        )
-        setTotal(sum as number)
+        if (Array.isArray(d.contributions) && d.contributions.length > 0) {
+          setContributions(d.contributions)
+          const sum = Object.values(d.total as Record<string, number>).reduce(
+            (a: number, b) => a + (b as number), 0
+          )
+          const totalVal = sum as number
+          setTotal(totalVal)
+          try {
+            localStorage.setItem(
+              "portfolio-gh-contributions",
+              JSON.stringify({ contributions: d.contributions, total: totalVal })
+            )
+          } catch {}
+        }
         setLoaded(true)
       })
       .catch(() => setLoaded(true))
@@ -125,22 +157,23 @@ export default function GitHubHeatmap() {
       transition={{ duration: 0.5, ease: "easeOut" }}
       className="relative select-none"
       style={{
-        width: HEATMAP_CONFIG.widgetWidth,
-        ...(HEATMAP_CONFIG.widgetHeight ? { height: HEATMAP_CONFIG.widgetHeight } : {}),
+        width,
+        height: isTetrisMode ? (height && height > 360 ? height : 440) : height,
         ...(isTetrisMode ? { marginRight: 351, marginTop: -255, zIndex: 5 } : { marginRight: 0, zIndex: 5 }),
       }}
     >
-      <div className="retroui-card overflow-hidden flex flex-col h-full">
+      <WidgetResizeHandles onResizeStart={handleResizeStart} />
+      <div className="retroui-card overflow-hidden flex flex-col h-full w-full">
         <div
-          className="flex items-center justify-center cursor-grab active:cursor-grabbing"
+          className="flex-none flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
           style={{ height: 22, background: "var(--drag-handle-bg)", borderBottom: "1px solid var(--separator)" }}
           onPointerDown={(e) => dragControls.start(e)}
         >
           <div style={{ width: 24, height: 2, borderRadius: 1, background: "var(--text-faint)" }} />
         </div>
 
-        <div className="px-4 pt-3 pb-3">
-          <div className="flex flex-wrap items-center justify-between mb-2.5 gap-2">
+        <div className="flex-1 min-h-0 px-3.5 pt-2.5 pb-2.5 flex flex-col justify-between overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between mb-2 gap-2 flex-none min-w-0">
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5">
                 <Github size={11} style={{ color: "var(--text-muted)" }} />
@@ -167,52 +200,58 @@ export default function GitHubHeatmap() {
               )}
             </div>
             {!isTetrisMode && total > 0 && (
-              <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-                {total.toLocaleString()} contributions this year
+              <span className="text-[10px] font-mono truncate" style={{ color: "var(--text-muted)" }}>
+                {total.toLocaleString()} contributions
               </span>
             )}
           </div>
 
           {isTetrisMode ? (
-            <TetrisGame />
+            <div className="flex-1 min-h-0 flex items-center justify-center overflow-hidden">
+              <TetrisGame />
+            </div>
           ) : displayWeeks.length === 0 ? (
-            <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>No data</div>
+            <div className="text-[10px] py-2 font-mono flex items-center justify-center gap-2" style={{ color: "var(--text-muted)" }}>
+              <span>Loading contributions...</span>
+            </div>
           ) : (
-            <div>
-              <div style={{ position: "relative", height: 14, marginBottom: 2, width: displayWeeks.length * colWidth }}>
-                {monthPositions.map(({ label, col }) => (
-                  <span
-                    key={`${label}-${col}`}
-                    style={{
-                      position: "absolute",
-                      left: col * colWidth,
-                      fontSize: 9,
-                      color: "var(--text-muted)",
-                      lineHeight: "14px",
-                    }}
-                  >
-                    {label}
-                  </span>
-                ))}
-              </div>
+            <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden mac-scrollbar pb-1">
+              <div style={{ width: displayWeeks.length * colWidth }}>
+                <div style={{ position: "relative", height: 14, marginBottom: 2, width: displayWeeks.length * colWidth }}>
+                  {monthPositions.map(({ label, col }) => (
+                    <span
+                      key={`${label}-${col}`}
+                      style={{
+                        position: "absolute",
+                        left: col * colWidth,
+                        fontSize: 9,
+                        color: "var(--text-muted)",
+                        lineHeight: "14px",
+                      }}
+                    >
+                      {label}
+                    </span>
+                  ))}
+                </div>
 
-              <div style={{ display: "flex", gap: GAP }}>
-                {displayWeeks.map((week, wi) => (
-                  <div key={wi} style={{ display: "flex", flexDirection: "column", gap: GAP }}>
-                    {week.map((day, di) => (
-                      <div
-                        key={di}
-                        title={day ? `${day.date}: ${day.count} contributions` : ""}
-                        style={{
-                          width: CELL,
-                          height: CELL,
-                          borderRadius: 2,
-                          background: day ? LEVEL_COLORS[day.level] : "transparent",
-                        }}
-                      />
-                    ))}
-                  </div>
-                ))}
+                <div style={{ display: "flex", gap: GAP }}>
+                  {displayWeeks.map((week, wi) => (
+                    <div key={wi} style={{ display: "flex", flexDirection: "column", gap: GAP }}>
+                      {week.map((day, di) => (
+                        <div
+                          key={di}
+                          title={day ? `${day.date}: ${day.count} contributions` : ""}
+                          style={{
+                            width: CELL,
+                            height: CELL,
+                            borderRadius: 2,
+                            background: day ? LEVEL_COLORS[day.level] : "transparent",
+                          }}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
