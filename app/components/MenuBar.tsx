@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Eye, CalendarDays, Clock, Monitor, FileText } from "lucide-react"
+import { Eye, CalendarDays, Clock, Monitor } from "lucide-react"
 import { siteConfig } from "@/config/siteConfig"
 
 interface MenuBarProps {
@@ -11,7 +11,6 @@ interface MenuBarProps {
 
 export default function MenuBar({
   focusedApp,
-  onModeChange,
 }: MenuBarProps) {
   const [timeStr, setTimeStr] = useState("")
   const [dateStr, setDateStr] = useState("")
