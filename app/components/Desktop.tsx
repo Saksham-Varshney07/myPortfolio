@@ -17,6 +17,8 @@ import BootLoadingScreen from "./BootLoadingScreen"
 import { SolaceFieldShader } from "./solace-field-shader"
 import { siteConfig } from "@/config/siteConfig"
 import { windows, type WindowId } from "@/config/windows"
+import { Construction, Hammer, X } from "lucide-react"
+import { playClickSound } from "@/lib/sound"
 import PlainPortfolio from "./plain/PlainPortfolio"
 import AITransitionOverlay from "./plain/AITransitionOverlay"
 
@@ -33,6 +35,7 @@ export default function Desktop() {
   const [windowOrder, setWindowOrder] = useState<WindowId[]>([])
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
   const [showAboutOverlay, setShowAboutOverlay] = useState(false)
+  const [showUnderConstruction, setShowUnderConstruction] = useState(false)
   const [konamiActive, setKonamiActive] = useState(false)
   const konamiIdx = useRef(0)
 
@@ -121,17 +124,31 @@ export default function Desktop() {
     } catch {}
   }, [])
 
+  useEffect(() => {
+    if (!showUnderConstruction) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        playClickSound()
+        setShowUnderConstruction(false)
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [showUnderConstruction])
+
   const handleSwitchMode = useCallback((targetMode: "desktop" | "plain") => {
+    if (targetMode === "plain") {
+      playClickSound()
+      setShowUnderConstruction(true)
+      return
+    }
+
     if (targetMode === viewMode) return
 
-    if (targetMode === "plain") {
-      setIsAITransitioning(true)
-    } else {
-      setViewMode("desktop")
-      try {
-        localStorage.setItem("portfolio-view-mode", "desktop")
-      } catch {}
-    }
+    setViewMode("desktop")
+    try {
+      localStorage.setItem("portfolio-view-mode", "desktop")
+    } catch {}
   }, [viewMode])
 
   const handleAITransitionComplete = useCallback(() => {
@@ -207,8 +224,8 @@ export default function Desktop() {
               <Window
                 key={win.id}
                 windowId={win.id}
-                title={win.id === "resume" ? `Resume — ${siteConfig.personal.fullName}` : win.title}
-                isOpen={openWindows.includes(win.id)}
+                title={win.title}
+                isOpen={!isBootLoading && openWindows.includes(win.id)}
                 isFocused={focusedWindow === win.id}
                 isMinimized={minimizedWindows.includes(win.id)}
                 onClose={() => closeWindow(win.id)}
@@ -249,7 +266,7 @@ export default function Desktop() {
             </motion.div>
           </div>
 
-          <Dock openWindows={openWindows} onToggleWindow={toggleWindow} />
+          <Dock openWindows={openWindows} onToggleWindow={toggleWindow} onSwitchMode={handleSwitchMode} />
 
           <AnimatePresence>
             {contextMenu && (
@@ -351,6 +368,116 @@ export default function Desktop() {
           </AnimatePresence>
         </div>
       )}
+
+      {/* Retro Under Construction Prompt */}
+      <AnimatePresence>
+        {showUnderConstruction && (
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            className="fixed inset-0 z-[800] flex items-center justify-center p-4 select-none"
+            style={{ background: "rgba(0, 0, 0, 0.45)", backdropFilter: "blur(3px)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => {
+              playClickSound()
+              setShowUnderConstruction(false)
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 12 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 12 }}
+              transition={{ type: "spring", damping: 26, stiffness: 360 }}
+              className="w-[330px] max-w-[92vw] overflow-hidden"
+              style={{
+                background: "var(--window-bg, #ffffff)",
+                border: "2px solid var(--widget-border, #000000)",
+                boxShadow: "4px 4px 0px var(--shadow-card, #000000)",
+                borderRadius: "var(--widget-radius, 6px)",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Title Bar */}
+              <div
+                className="flex items-center justify-between px-3 py-2 select-none"
+                style={{
+                  background: "var(--titlebar-bg, #f3edf0)",
+                  borderBottom: "2px solid var(--widget-border, #000000)",
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <Construction size={14} className="text-amber-500" />
+                  <span
+                    className="font-minecraft-bold text-[12px] uppercase tracking-wider"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    System Notice
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    playClickSound()
+                    setShowUnderConstruction(false)
+                  }}
+                  className="p-0.5 hover:opacity-70 transition-opacity cursor-pointer"
+                  style={{ color: "var(--text-primary)" }}
+                  aria-label="Close"
+                >
+                  <X size={14} strokeWidth={2.5} />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-5 flex flex-col items-center text-center gap-3">
+                <div
+                  className="w-12 h-12 flex items-center justify-center rounded-lg"
+                  style={{
+                    background: "var(--item-separator, rgba(0,0,0,0.06))",
+                    border: "1.5px solid var(--widget-border, #000000)",
+                  }}
+                >
+                  <Hammer size={24} className="text-amber-600 animate-bounce" />
+                </div>
+
+                <div>
+                  <h3
+                    className="font-minecraft-bold text-[13px] uppercase tracking-wide mb-1.5"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    Plain View Under Construction
+                  </h3>
+                  <p
+                    className="font-mono text-[11px] leading-relaxed"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    This minimalist view is currently being refined. Stay tuned for the next update!
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    playClickSound()
+                    setShowUnderConstruction(false)
+                  }}
+                  className="mt-1 px-6 py-1.5 rounded font-minecraft-bold text-[11px] uppercase tracking-wider cursor-pointer transition-transform hover:scale-105 active:scale-95 select-none"
+                  style={{
+                    background: "var(--tooltip-bg, var(--menubar-bg))",
+                    border: "1.5px solid var(--widget-border, #000000)",
+                    color: "var(--text-primary)",
+                    boxShadow: "2px 2px 0px var(--shadow-card, #000000)",
+                  }}
+                >
+                  OK
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }

@@ -92,6 +92,8 @@ function generateRandomDarkTheme() {
     "--text-card": "#ffffff",
     "--border-card": accentColor,
     "--shadow-card": accentColor,
+    "--status-border-color": accentColor,
+    "--status-border-track": "rgba(255, 255, 255, 0.15)",
   };
 }
 
@@ -148,9 +150,9 @@ const retroThemeVars: Record<string, string> = {
   "--border-card": "#000000",
   "--shadow-card": "#000000",
   "--card-border-svg": "var(--retroui-border-svg-light)",
+  "--status-border-color": "#000000",
+  "--status-border-track": "rgba(0, 0, 0, 0.12)",
 };
-
-
 
 const darkThemeVars: Record<string, string> = {
   "--font-app": "'Minecraft', monospace, sans-serif",
@@ -201,6 +203,8 @@ const darkThemeVars: Record<string, string> = {
   "--text-card": "#ffffff",
   "--border-card": "#ffffff",
   "--shadow-card": "#ffffff",
+  "--status-border-color": "#ffffff",
+  "--status-border-track": "rgba(255, 255, 255, 0.15)",
 };
 
 // ─── UI Sizing Config ──────────────────────────────────────────────────────────

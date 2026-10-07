@@ -1,300 +1,381 @@
 "use client"
 
 import React, { useEffect, useRef, useState, useCallback } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Check, Loader2, Terminal } from "lucide-react"
-
-interface Step {
-  id: string
-  label: string
-  detail: string
-  triggerTime: number
-  completeTime: number
-}
-
-const STEPS: Step[] = [
-  { id: "sys", label: "Starting system", detail: "Kernel initialization & core services", triggerTime: 0.2, completeTime: 1.4 },
-  { id: "exp", label: "Gathering experience", detail: "Software development & AI/ML modules", triggerTime: 1.4, completeTime: 2.7 },
-  { id: "prj", label: "Building projects", detail: "Compiling interactive showcases", triggerTime: 2.7, completeTime: 4.0 },
-  { id: "stk", label: "Indexing skills & stack", detail: "Next.js, TypeScript, React & Three.js", triggerTime: 4.0, completeTime: 5.3 },
-  { id: "cal", label: "Calibrating desktop", detail: "Mounting widgets, dock & window manager", triggerTime: 5.3, completeTime: 6.6 },
-  { id: "rdy", label: "Launching workspace", detail: "Opening portfolio interface", triggerTime: 6.6, completeTime: 8.0 },
-]
-
-// ─── Video & Background Sizing Config ──────────────────────────────────────────
-// Adjust the zoom level, fit mode, and alignment of the loading screen video here:
-export const LOADING_VIDEO_CONFIG = {
-  scale: 1.0,                  // Scale factor: 1.0 = native size, < 1.0 = zoom out, > 1.0 = zoom in
-  objectFit: "contain" as const, // "contain" matches VLC (shows 100% full uncropped video); change to "cover" to stretch to all edges
-  objectPosition: "center center", // e.g. "center center", "center top"
-}
-
-// ─── UI Sizing Config ──────────────────────────────────────────────────────────
-// Adjust the font size and padding of the "Skip [ESC]" button here:
-export const SKIP_BUTTON_CONFIG = {
-  fontSize: 10,      // Font size in pixels (e.g. 7, 8, 9, 10, 11)
-  paddingX: 10,      // Horizontal padding in pixels (left & right)
-  paddingY: 4,       // Vertical padding in pixels (top & bottom)
-}
-
-// ─── HUD Position Config ───────────────────────────────────────────────────────
-// Adjust vertical positioning and maximum width of the loading HUD card on top:
-export const LOADING_HUD_CONFIG = {
-  topMargin: "3.5vh", // Distance from top of screen near the pixel window (e.g. "2vh", "3.5vh", "24px")
-  maxWidth: 640,      // Max width in pixels
-}
+import { motion } from "framer-motion"
 
 interface BootLoadingScreenProps {
   onComplete: () => void
 }
 
 export default function BootLoadingScreen({ onComplete }: BootLoadingScreenProps) {
-  const [currentStepIndex, setCurrentStepIndex] = useState(0)
-  const [completedSteps, setCompletedSteps] = useState<string[]>([])
-  const [progress, setProgress] = useState(0)
-  const [isFinishing, setIsFinishing] = useState(false)
+  const [isFadingOut, setIsFadingOut] = useState(false)
   const hasCompletedRef = useRef(false)
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const pageReadyRef = useRef(false)
 
-  const triggerComplete = useCallback(() => {
+  // DOM element refs
+  const sceneRef = useRef<HTMLDivElement>(null)
+  const firstRef = useRef<HTMLSpanElement>(null)
+  const secondRef = useRef<HTMLSpanElement>(null)
+  const cursorRef = useRef<HTMLSpanElement>(null)
+  const cursor2Ref = useRef<HTMLSpanElement>(null)
+  const runtimeRef = useRef<HTMLSpanElement>(null)
+  const statusRef = useRef<HTMLSpanElement>(null)
+  const meterRef = useRef<HTMLSpanElement>(null)
+  const errorRef = useRef<HTMLDivElement>(null)
+  const outputRef = useRef<HTMLSpanElement>(null)
+  const openingRef = useRef<HTMLSpanElement>(null)
+
+  // Check initial document readiness
+  useEffect(() => {
+    if (typeof document !== "undefined" && document.readyState === "complete") {
+      pageReadyRef.current = true
+    } else if (typeof window !== "undefined") {
+      const handleLoad = () => {
+        pageReadyRef.current = true
+      }
+      window.addEventListener("load", handleLoad)
+      return () => window.removeEventListener("load", handleLoad)
+    }
+  }, [])
+
+  const triggerExit = useCallback(() => {
     if (hasCompletedRef.current) return
     hasCompletedRef.current = true
-    setIsFinishing(true)
+    setIsFadingOut(true)
     setTimeout(() => {
       onComplete()
-    }, 250)
+    }, 450)
   }, [onComplete])
 
-  // -------------------------------------------------------------
-  // Boot Sequence Timeline Engine
-  // -------------------------------------------------------------
-  useEffect(() => {
-    const startTime = Date.now()
-    const totalDuration = 8.0
-    let animationFrameId: number
-
-    const updateTimeline = () => {
-      if (hasCompletedRef.current) return
-
-      const elapsed = (Date.now() - startTime) / 1000
-
-      if (elapsed >= totalDuration) {
-        setProgress(100)
-        setCurrentStepIndex(STEPS.length - 1)
-        setCompletedSteps(STEPS.map((s) => s.id))
-        triggerComplete()
-        return
-      }
-
-      // Smooth progress calculation
-      const currentPct = Math.min(99, Math.round((elapsed / totalDuration) * 100))
-      setProgress(currentPct)
-
-      // Active & completed steps
-      const activeIdx = STEPS.findIndex((s) => elapsed >= s.triggerTime && elapsed < s.completeTime)
-      if (activeIdx !== -1) {
-        setCurrentStepIndex(activeIdx)
-      } else if (elapsed >= 6.6) {
-        setCurrentStepIndex(STEPS.length - 1)
-      }
-
-      const newlyDone = STEPS.filter((s) => elapsed >= s.completeTime).map((s) => s.id)
-      setCompletedSteps(newlyDone)
-
-      animationFrameId = requestAnimationFrame(updateTimeline)
-    }
-
-    animationFrameId = requestAnimationFrame(updateTimeline)
-
-    return () => {
-      cancelAnimationFrame(animationFrameId)
-    }
-  }, [triggerComplete])
-
-  // Allow ESC to skip immediately
+  // Allow ESC key to skip
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        triggerComplete()
+        triggerExit()
       }
     }
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [triggerComplete])
+  }, [triggerExit])
+
+  useEffect(() => {
+    const scene = sceneRef.current
+    const first = firstRef.current
+    const second = secondRef.current
+    const cursor = cursorRef.current
+    const cursor2 = cursor2Ref.current
+    const runtime = runtimeRef.current
+    const status = statusRef.current
+    const meter = meterRef.current
+    const error = errorRef.current
+    const output = outputRef.current
+    const opening = openingRef.current
+
+    if (
+      !scene ||
+      !first ||
+      !second ||
+      !cursor ||
+      !cursor2 ||
+      !runtime ||
+      !status ||
+      !meter ||
+      !error ||
+      !output ||
+      !opening
+    ) {
+      return
+    }
+
+    // Clear and build initial dynamic spans
+    output.innerHTML = ""
+    opening.innerHTML = ""
+    meter.innerHTML = ""
+
+    const firstCode = "helloworld(print)"
+    const secondCode = 'df.read_portfolio("saksham")'
+
+    function letters(targetEl: HTMLElement, text: string) {
+      return [...text].map((c) => {
+        const s = document.createElement("span")
+        s.textContent = c
+        s.style.opacity = "0"
+        targetEl.appendChild(s)
+        return { el: s, char: c }
+      })
+    }
+
+    const nameLetters = letters(output, "saksham")
+    const openingLetters = letters(opening, "Opening portfolio…")
+
+    const oc = document.createElement("span")
+    oc.className = "output-cursor"
+    opening.appendChild(oc)
+
+    const bars = Array.from({ length: 9 }, () => {
+      const i = document.createElement("i")
+      meter.appendChild(i)
+      return i
+    })
+
+    const reducedQuery = window.matchMedia("(prefers-reduced-motion: reduce)")
+    const clamp = (x: number) => Math.max(0, Math.min(1, x))
+    const ease = (x: number) => x * x * (3 - 2 * x)
+
+    let start: number | null = null
+    let frame = 0
+    let hiddenAt: number | null = null
+    let heldAt: number | null = null
+    let isTerminated = false
+
+    // Keep the story's proportions, exactly matching 6.5s (5000 * 1.3 = 6500ms)
+    const pace = 1.3
+
+    function typeCount(text: string, progress: number) {
+      const beats = [...text].map(
+        (c, i) => 1 + ((i * 7) % 5) * 0.13 + ('(."'.includes(c) ? 0.5 : 0)
+      )
+      const budget = clamp(progress) * beats.reduce((a, b) => a + b, 0)
+      let used = 0
+      let count = 0
+      for (const beat of beats) {
+        used += beat
+        if (used > budget + 1e-8) break
+        count++
+      }
+      return count
+    }
+
+    function applyState(t: number, msNow: number) {
+      first.textContent = firstCode.slice(0, typeCount(firstCode, (t - 100) / 560))
+      second.textContent = secondCode.slice(0, typeCount(secondCode, (t - 1700) / 850))
+      first.className = t > 1700 ? "old-code" : ""
+      cursor.style.display = t < 760 ? "inline-block" : "none"
+      cursor2.style.display = t >= 1700 && t < 2630 ? "inline-block" : "none"
+      error.style.opacity = String(
+        ease(clamp((t - 760) / 130)) * (1 - ease(clamp((t - 2370) / 210)))
+      )
+      runtime.textContent =
+        t < 760
+          ? "ready"
+          : t < 1700
+          ? "oops"
+          : t < 2630
+          ? "retrying"
+          : t < 3350
+          ? "✓ recovered"
+          : "launching"
+      status.textContent =
+        t < 760
+          ? "BOOTING CONFIDENCE"
+          : t < 1700
+          ? "CONFIDENCE: NOT FOUND"
+          : t < 2630
+          ? "PLAN B. OBVIOUSLY."
+          : "BUG FIXED. EGO PENDING."
+
+      function reveal(
+        items: { el: HTMLSpanElement; char: string }[],
+        begin: number,
+        stagger: number
+      ) {
+        items.forEach(({ el, char }, i) => {
+          const local = clamp((t - begin - i * stagger) / 220)
+          const settle = 1 - Math.pow(1 - local, 3)
+          el.style.opacity = String(settle)
+          el.style.transform = `translateY(${(1 - settle) * 7}px)`
+          el.textContent =
+            char !== " " && local > 0 && local < 0.42
+              ? "01{}<>/="[(Math.floor(t / 48) + i * 3) % 8]
+              : char
+        })
+      }
+
+      reveal(nameLetters, 2650, 55)
+      reveal(openingLetters, 3240, 29)
+
+      // Cursor blinking during final phase or while holding
+      const isBlinkingPhase =
+        (t > 3980 && t < 4730) || (t >= 4700 && !pageReadyRef.current)
+      oc.style.opacity = isBlinkingPhase
+        ? Math.floor(msNow / 350) % 2
+          ? "0"
+          : "1"
+        : "0"
+
+      scene.style.opacity = String(1 - ease(clamp((t - 4760) / 240)))
+      bars.forEach((b, i) =>
+        b.classList.toggle(
+          "on",
+          t < 760
+            ? i < Math.floor(t / 95)
+            : t < 1700
+            ? false
+            : t < 3980
+            ? i === Math.floor(t / 65) % 9
+            : t < 4760
+        )
+      )
+    }
+
+    function tick(now: number) {
+      if (isTerminated || hasCompletedRef.current) return
+      if (start === null) start = now
+
+      if (reducedQuery.matches) {
+        applyState(4350, now)
+        // Reduced motion: hold for 1.4s then smoothly exit
+        if (now - start > 1400) {
+          isTerminated = true
+          triggerExit()
+        } else {
+          frame = requestAnimationFrame(tick)
+        }
+        return
+      }
+
+      const elapsed = now - start
+      const virtualT = elapsed / pace
+
+      // If animation has reached the end of the reveal (4700) but page is still loading,
+      // hold in the final "Opening portfolio…" state until page load finishes
+      if (!pageReadyRef.current && virtualT >= 4700) {
+        if (heldAt === null) {
+          heldAt = now
+        }
+        applyState(4700, now)
+      } else {
+        if (heldAt !== null) {
+          start += now - heldAt
+          heldAt = null
+        }
+        const currentElapsed = now - start
+        const t = currentElapsed / pace
+        applyState(t, now)
+
+        if (t >= 5000) {
+          isTerminated = true
+          triggerExit()
+          return
+        }
+      }
+
+      if (!isTerminated && !hasCompletedRef.current) {
+        frame = requestAnimationFrame(tick)
+      }
+    }
+
+    function sync() {
+      cancelAnimationFrame(frame)
+      if (reducedQuery.matches) {
+        applyState(4350, performance.now())
+        setTimeout(() => triggerExit(), 1400)
+      } else if (!document.hidden) {
+        frame = requestAnimationFrame(tick)
+      }
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        hiddenAt = performance.now()
+        cancelAnimationFrame(frame)
+      } else {
+        if (start !== null && hiddenAt !== null) {
+          start += performance.now() - hiddenAt
+        }
+        hiddenAt = null
+        sync()
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    reducedQuery.addEventListener("change", sync)
+
+    sync()
+
+    return () => {
+      isTerminated = true
+      cancelAnimationFrame(frame)
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      reducedQuery.removeEventListener("change", sync)
+    }
+  }, [triggerExit])
 
   return (
     <motion.div
       initial={{ opacity: 1 }}
-      animate={{ opacity: isFinishing ? 0 : 1 }}
-      exit={{ opacity: 0, scale: 1.02 }}
-      transition={{ duration: 0.35, ease: "easeInOut" }}
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-start select-none overflow-hidden bg-black"
+      animate={{ opacity: isFadingOut ? 0 : 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5, ease: "easeInOut" }}
+      className="py-loader-root"
+      style={{
+        position: "fixed",
+        inset: 0,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: "100%",
+        height: "100%",
+        zIndex: 999999,
+        backgroundColor: "#ffffff",
+      }}
     >
-      {/* Animated Pixel Room Video Background (Native sharpness without filters) */}
-      <video
-        ref={videoRef}
-        src="/loadinganimation.mp4"
-        poster="/boot-room-pixel.jpg"
-        autoPlay
-        muted
-        playsInline
-        loop
-        className="absolute inset-0 w-full h-full z-0"
-        style={{
-          objectFit: LOADING_VIDEO_CONFIG.objectFit,
-          objectPosition: LOADING_VIDEO_CONFIG.objectPosition,
-          transform: `scale(${LOADING_VIDEO_CONFIG.scale})`,
-        }}
-      />
-
-      {/* Soft Top Gradient to ensure terminal HUD text readability over the window */}
-      <div
-        className="absolute inset-x-0 top-0 h-80 z-1 pointer-events-none"
-        style={{
-          background: "linear-gradient(to bottom, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.28) 60%, transparent 100%)",
-        }}
-      />
-
-      {/* Top HUD Wrapper: Positioned near the window above the desk */}
-      <div
-        className="relative z-20 flex flex-col items-center w-full px-4"
-        style={{
-          marginTop: LOADING_HUD_CONFIG.topMargin,
-          maxWidth: `${LOADING_HUD_CONFIG.maxWidth}px`,
-        }}
+      <main
+        className="loader"
+        aria-label="A playful Python loading animation: an incorrect hello world raises an error, then a portfolio command reveals saksham and Opening portfolio."
       >
-        {/* Top Subtle OS Badge */}
-        <motion.div
-          initial={{ y: -15, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-          className="mb-2 flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 backdrop-blur-md bg-black/60 text-[11px] font-minecraft text-white/70 shadow-lg"
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="tracking-widest uppercase">Saksham OS // Boot Sequence</span>
-        </motion.div>
-
-        {/* Top HUD: System Loading Progress & Checkpoints */}
-        <motion.div
-          initial={{ y: -15, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.45, ease: "easeOut" }}
-          className="w-full rounded-2xl p-4 overflow-hidden"
-          style={{
-            background: "rgba(10, 14, 26, 0.72)",
-            backdropFilter: "blur(24px) saturate(180%)",
-            WebkitBackdropFilter: "blur(24px) saturate(180%)",
-            border: "1px solid rgba(255, 255, 255, 0.14)",
-            borderTop: "1px solid rgba(255, 255, 255, 0.28)",
-            boxShadow: "0 25px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.12), 0 0 25px rgba(56, 189, 248, 0.1)",
-          }}
-        >
-        {/* Terminal Header Row */}
-        <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-white/[0.08]">
-          <div className="flex items-center gap-2 font-minecraft text-[12px] text-white/60 tracking-wider">
-            <Terminal size={12} className="text-cyan-400" />
-            <span className="font-semibold text-white/80">SYSTEM_BOOT.sh</span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className="font-minecraft text-[13px] font-bold text-cyan-400">
-              {progress}%
+        <div aria-hidden="true">
+          <header className="top">
+            <span className="file">
+              <b>›_</b> portfolio.py
             </span>
-            <button
-              type="button"
-              onClick={triggerComplete}
-              className="transition-colors uppercase font-minecraft tracking-wider rounded border border-white/20 hover:border-white/50 hover:bg-white/10 cursor-pointer"
-              style={{
-                color: "#ffffff",
-                fontSize: `${SKIP_BUTTON_CONFIG.fontSize}px`,
-                padding: `${SKIP_BUTTON_CONFIG.paddingY}px ${SKIP_BUTTON_CONFIG.paddingX}px`,
-                lineHeight: 1,
-              }}
-            >
-              Skip [ESC]
-            </button>
-          </div>
-        </div>
-
-        {/* Progress Bar (Smooth hardware-accelerated linear transition, zero jitter) */}
-        <div className="w-full h-1.5 rounded-full bg-white/[0.08] overflow-hidden mb-3.5 relative">
-          <div
-            className="h-full rounded-full relative"
-            style={{
-              background: "#ffffff",
-              boxShadow: "0 0 10px rgba(255, 255, 255, 0.6)",
-              width: `${progress}%`,
-              transition: "width 100ms linear",
-              willChange: "width",
-            }}
-          />
-        </div>
-
-        {/* Grid of Steps (2 Columns) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 font-minecraft">
-          {STEPS.map((step, idx) => {
-            const isDone = completedSteps.includes(step.id)
-            const isCurrent = currentStepIndex === idx && !isDone
-
-            return (
-              <div
-                key={step.id}
-                className={`flex items-center justify-between text-[11px] px-2.5 py-1.5 rounded transition-all duration-200 ${isCurrent
-                    ? "bg-cyan-500/10 border border-cyan-500/30 text-white"
-                    : isDone
-                      ? "bg-white/[0.02] text-white/85"
-                      : "text-white/30"
-                  }`}
-              >
-                <div className="flex items-center gap-2 truncate pr-1">
-                  <div className="w-4 h-4 flex-none flex items-center justify-center">
-                    <AnimatePresence mode="wait">
-                      {isDone ? (
-                        <motion.div
-                          key="check"
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: "spring", stiffness: 450, damping: 25 }}
-                          className="w-3.5 h-3.5 rounded-full bg-emerald-500/20 border border-emerald-400/60 flex items-center justify-center text-emerald-400 shadow-[0_0_8px_rgba(74,222,128,0.4)]"
-                        >
-                          <Check size={9} strokeWidth={3} />
-                        </motion.div>
-                      ) : isCurrent ? (
-                        <motion.div
-                          key="loader"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          className="text-cyan-400"
-                        >
-                          <Loader2 size={12} className="animate-spin" />
-                        </motion.div>
-                      ) : (
-                        <span className="w-1.5 h-1.5 rounded-full bg-white/20" />
-                      )}
-                    </AnimatePresence>
-                  </div>
-
-                  <span className="tracking-wide capitalize truncate">
-                    {step.label}
-                  </span>
-                </div>
-
-                <span
-                  className={`text-[9.5px] uppercase font-minecraft tracking-wider flex-none ${isDone
-                      ? "text-emerald-400 font-semibold"
-                      : isCurrent
-                        ? "text-cyan-400 animate-pulse"
-                        : "text-white/20"
-                    }`}
-                >
-                  {isDone ? "[ OK ]" : isCurrent ? "[ RUN ]" : "[ WAIT ]"}
+            <span className="live"></span>
+          </header>
+          <div className="scene" ref={sceneRef}>
+            <section className="editor">
+              <div className="row">
+                <span className="ln">01</span>
+                <span className="muted"># trust me, i&apos;m a developer.</span>
+              </div>
+              <div className="row">
+                <span className="ln">02</span>
+                <span ref={firstRef}></span>
+                <span ref={cursorRef} className="cursor"></span>
+              </div>
+              <div className="row">
+                <span className="ln">03</span>
+                <span ref={secondRef}></span>
+                <span ref={cursor2Ref} className="cursor"></span>
+              </div>
+            </section>
+            <section className="terminal">
+              <div className="terminal-head">
+                <span>PYTHON · OUTPUT</span>
+                <span className="runtime" ref={runtimeRef}>
+                  ready
                 </span>
               </div>
-            )
-          })}
+              <div className="result">
+                <span className="prompt">›</span>
+                <div className="error" ref={errorRef}>
+                  <strong>NameError:</strong> &apos;helloworld&apos; is not defined.
+                  <br />
+                  <small>coffee first. syntax later.</small>
+                </div>
+                <div className="success">
+                  <span className="output" ref={outputRef}></span>
+                  <span className="output opening" ref={openingRef}></span>
+                </div>
+              </div>
+            </section>
+          </div>
+          <footer className="footer">
+            <span ref={statusRef}>BOOTING CONFIDENCE</span>
+            <span className="meter" ref={meterRef}></span>
+          </footer>
         </div>
-      </motion.div>
-      </div>
+      </main>
     </motion.div>
   )
 }

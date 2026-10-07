@@ -31,44 +31,45 @@ export default function StatusWidget({ onContactClick }: { onContactClick?: () =
       style={{ zIndex: 5, width, height }}
     >
       <WidgetResizeHandles onResizeStart={handleResizeStart} />
-      {/* Siri-style animated neon glow (outer blur) */}
-      <div className="absolute -inset-[2px] rounded-[10px] z-0 pointer-events-none blur-[10px] opacity-75 overflow-hidden">
-        <div 
-          className="absolute inset-[-100%] animate-[spin_4s_linear_infinite]"
-          style={{
-            background: "conic-gradient(from 0deg, transparent 0%, rgba(255,42,133,1) 20%, rgba(138,43,226,1) 40%, rgba(65,105,225,1) 60%, rgba(0,255,255,1) 80%, transparent 100%)"
-          }}
-        />
-      </div>
+      {/* Main Card Frame with Rotating Chipped Border */}
+      <div
+        className="relative w-full h-full rounded-[6px] overflow-hidden"
+        style={{
+          boxShadow: "2px 2px 0 0px var(--card-custom-shadow, var(--shadow-card, #000000))",
+        }}
+      >
 
-      {/* Siri-style animated neon edge (sharp border) */}
-      <div className="absolute -inset-[1.5px] rounded-[9px] z-0 pointer-events-none overflow-hidden">
-        <div 
-          className="absolute inset-[-100%] animate-[spin_4s_linear_infinite]"
-          style={{
-            background: "conic-gradient(from 0deg, transparent 0%, rgba(255,42,133,1) 20%, rgba(138,43,226,1) 40%, rgba(65,105,225,1) 60%, rgba(0,255,255,1) 80%, transparent 100%)"
-          }}
-        />
-      </div>
-
-      {/* Solid mask to hide the spinning gradient from the center of the widget */}
-      <div 
-        className="absolute inset-0 rounded-[8px] z-0 pointer-events-none" 
-        style={{ background: "var(--menubar-bg)" }} 
-      />
-
-      {/* Actual Content Layers */}
-      <div className="relative z-10 flex flex-col h-full rounded-[8px] overflow-hidden">
-        <div 
-          className="widget-handle flex-none flex items-center justify-center cursor-grab active:cursor-grabbing select-none" 
-          onPointerDown={(e) => dragControls.start(e)}
-          style={{ border: "none", background: "transparent", height: 22 }}
-        >
-          <div style={{ width: 24, height: 2, borderRadius: 1, background: "var(--text-faint)" }} />
+        {/* Rotating border line with a chipped (missing) segment */}
+        <div className="absolute inset-0 rounded-[6px] overflow-hidden pointer-events-none z-0">
+          <div 
+            className="absolute inset-[-150%] animate-[spin_4s_linear_infinite]"
+            style={{
+              background: "conic-gradient(from 0deg, var(--status-border-color, var(--border-card, #000000)) 0deg, var(--status-border-color, var(--border-card, #000000)) 250deg, transparent 250deg, transparent 360deg)",
+            }}
+          />
         </div>
 
+        {/* Solid inner background masking out the center to reveal a crisp 2.5px rotating border */}
         <div 
-          className="widget-body flex-1 min-h-0 flex flex-col justify-between overflow-y-auto mac-scrollbar px-4 pb-3 pt-1"
+          className="absolute inset-[2.5px] rounded-[4px] z-10 flex flex-col overflow-hidden" 
+          style={{ background: "var(--card-custom-bg, var(--bg-card, #ffffff))" }} 
+        >
+          {/* Drag Handle */}
+          <div 
+            className="flex-none flex items-center justify-center cursor-grab active:cursor-grabbing select-none" 
+            onPointerDown={(e) => dragControls.start(e)}
+            style={{ 
+              border: "none",
+              borderBottom: "1px solid var(--separator)", 
+              background: "var(--drag-handle-bg, transparent)", 
+              height: 22 
+            }}
+          >
+            <div style={{ width: 24, height: 2, borderRadius: 1, background: "var(--text-faint)" }} />
+          </div>
+
+        <div 
+          className="flex-1 min-h-0 flex flex-col justify-between overflow-y-auto mac-scrollbar px-4 pb-3 pt-1"
           style={{ border: "none", background: "transparent" }}
         >
           <div
@@ -106,6 +107,7 @@ export default function StatusWidget({ onContactClick }: { onContactClick?: () =
             Actively looking for internships and full-time roles in <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>Software Development</span> and <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>AI/ML</span>.
           </p>
         </div>
+      </div>
       </div>
     </motion.div>
   )

@@ -47,23 +47,7 @@ export default function Window({
   const reactId = useId()
   const titleId = `window-title-${windowId ?? reactId}`
 
-  // Calculate default initial position
-  const getInitialPosition = useCallback(() => {
-    if (typeof window === "undefined") return { x: 100, y: 120 }
-    const actualWidth = Math.min(width, window.innerWidth - 32)
-    const actualHeight = Math.min(height, window.innerHeight - 140)
-    const initialX = Math.max(16, (window.innerWidth - actualWidth) / 2 + offsetX)
-    const initialY = Math.max(
-      115,
-      Math.min(
-        (window.innerHeight - actualHeight) / 2 + offsetY + 30,
-        window.innerHeight - actualHeight - 20
-      )
-    )
-    return { x: initialX, y: initialY }
-  }, [width, height, offsetX, offsetY])
-
-  const [position, setPosition] = useState<{ x: number; y: number }>(getInitialPosition)
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(null)
   const [size, setSize] = useState<{ width: number; height: number }>({
     width,
     height,
@@ -78,11 +62,9 @@ export default function Window({
       isHydrated.current = true
       const actualWidth = Math.min(width, window.innerWidth - 32)
       const actualHeight = Math.min(height, window.innerHeight - 140)
-      const initialPos = getInitialPosition()
-      setPosition(initialPos)
       setSize({ width: actualWidth, height: actualHeight })
     }
-  }, [width, height, getInitialPosition])
+  }, [width, height])
 
   // ESC key listener
   useEffect(() => {
@@ -106,10 +88,15 @@ export default function Window({
       if (preMaximizeState.current) {
         setPosition({ x: preMaximizeState.current.x, y: preMaximizeState.current.y })
         setSize({ width: preMaximizeState.current.width, height: preMaximizeState.current.height })
+      } else {
+        setPosition(null)
       }
       setIsMaximized(false)
     } else {
-      preMaximizeState.current = { ...position, ...size }
+      const rect = dialogRef.current?.getBoundingClientRect()
+      const currX = position ? position.x : (rect ? rect.left : 12)
+      const currY = position ? position.y : (rect ? rect.top : 36)
+      preMaximizeState.current = { x: currX, y: currY, width: size.width, height: size.height }
       const maxWidth = window.innerWidth - 24
       const maxHeight = window.innerHeight - 84
       setPosition({ x: 12, y: 36 })
@@ -126,10 +113,11 @@ export default function Window({
     e.preventDefault()
     onFocus()
 
+    const rect = dialogRef.current?.getBoundingClientRect()
     const startX = e.clientX
     const startY = e.clientY
-    const startPosX = position.x
-    const startPosY = position.y
+    const startPosX = position ? position.x : (rect ? rect.left : 0)
+    const startPosY = position ? position.y : (rect ? rect.top : 0)
 
     document.body.style.userSelect = "none"
 
@@ -167,12 +155,13 @@ export default function Window({
     e.stopPropagation()
     onFocus()
 
+    const rect = dialogRef.current?.getBoundingClientRect()
     const startX = e.clientX
     const startY = e.clientY
     const startW = size.width
     const startH = size.height
-    const startPosX = position.x
-    const startPosY = position.y
+    const startPosX = position !== null ? position.x : (rect ? rect.left : Math.round((window.innerWidth - size.width) / 2 + offsetX))
+    const startPosY = position !== null ? position.y : (rect ? rect.top : Math.round((window.innerHeight - size.height) / 2 + offsetY + 30))
 
     const cursorMap: Record<ResizeDirection, string> = {
       e: "ew-resize",
@@ -217,8 +206,8 @@ export default function Window({
       }
 
       if (isMaximized) setIsMaximized(false)
-      setSize({ width: newWidth, height: newHeight })
-      setPosition({ x: newPosX, y: newPosY })
+      setSize({ width: Math.round(newWidth), height: Math.round(newHeight) })
+      setPosition({ x: Math.round(newPosX), y: Math.round(newPosY) })
     }
 
     const onPointerUp = () => {
@@ -243,8 +232,12 @@ export default function Window({
           tabIndex={-1}
           style={{
             position: "fixed",
-            left: position.x,
-            top: position.y,
+            left: position
+              ? position.x
+              : `calc(50% - ${size.width / 2}px + ${offsetX}px)`,
+            top: position
+              ? position.y
+              : `clamp(115px, calc(50% - ${size.height / 2}px + ${offsetY}px + 30px), calc(100vh - ${size.height}px - 20px))`,
             width: size.width,
             height: size.height,
             zIndex,
@@ -347,7 +340,7 @@ export default function Window({
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <h2
                   id={titleId}
-                  className="font-minecraft text-[13px] uppercase tracking-[0.14em] m-0 font-bold select-none"
+                  className="font-minecraft-bold text-[14px] uppercase tracking-[0.14em] m-0 font-bold select-none"
                   style={{
                     color: isFocused ? "var(--text-primary)" : "var(--text-muted)",
                     transition: "color 0.2s",
@@ -406,7 +399,7 @@ export default function Window({
 
             {/* Window Content Area */}
             <div
-              className="flex-1 overflow-y-auto overflow-x-hidden mac-scrollbar relative"
+              className="flex-1 overflow-y-auto overflow-x-hidden mac-scrollbar relative flex flex-col min-h-0"
               style={{ background: "var(--window-bg)" }}
             >
               {children}

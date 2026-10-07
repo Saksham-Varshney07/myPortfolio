@@ -107,7 +107,8 @@
   --bg-card: #ffffff;
   --text-card: #000000;
   --border-card: #000000;
-  --shadow-card: #000000;
+  --status-border-color: #000000;
+  --status-border-track: rgba(0, 0, 0, 0.12);
 }
 
 [data-theme="dark"] {
@@ -150,7 +151,8 @@
   --bg-card: #000000;
   --text-card: #ffffff;
   --border-card: #ffffff;
-  --shadow-card: #ffffff;
+  --status-border-color: #ffffff;
+  --status-border-track: rgba(255, 255, 255, 0.15);
 }
 
 [data-mobile-theme="light"] {
@@ -482,3 +484,269 @@ body::after {
 .animate-aurora-bg {
   animation: aurora-smooth-bg 60s linear infinite;
 }
+
+/* ─── Python Loading Screen Scoped Styles ────────────────────────── */
+.py-loader-root {
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 999999 !important;
+  background: #ffffff !important;
+  color: #161616;
+  display: grid;
+  place-items: center;
+  font-family: Consolas, 'SFMono-Regular', 'Liberation Mono', monospace;
+  margin: 0;
+  user-select: none;
+  overflow: hidden;
+}
+
+.py-loader-root * {
+  box-sizing: border-box;
+}
+
+.py-loader-root .loader {
+  width: min(370px, calc(100vw - 40px));
+  position: relative;
+}
+
+.py-loader-root .top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0 14px;
+  border-bottom: 1px solid #ededed;
+  font-size: 10px;
+  letter-spacing: .04em;
+}
+
+.py-loader-root .file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+}
+
+.py-loader-root .file b {
+  color: #111;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.py-loader-root .live {
+  width: 4px;
+  height: 4px;
+  background: #aaa;
+  border-radius: 50%;
+}
+
+.py-loader-root .editor {
+  padding: 25px 0 20px;
+  position: relative;
+}
+
+.py-loader-root .row {
+  display: flex;
+  min-height: 28px;
+  align-items: center;
+  font-size: clamp(11px, 3.2vw, 14px);
+  letter-spacing: -.35px;
+  white-space: pre;
+}
+
+.py-loader-root .ln {
+  color: #ccc;
+  font-size: 10px;
+  min-width: 27px;
+  user-select: none;
+}
+
+.py-loader-root .muted {
+  color: #a3a3a3;
+}
+
+.py-loader-root .strong {
+  font-weight: 600;
+}
+
+.py-loader-root .str {
+  color: #111;
+}
+
+.py-loader-root .typed {
+  display: inline-block;
+}
+
+.py-loader-root .cursor {
+  display: inline-block;
+  width: .58em;
+  flex-shrink: 0;
+  height: 15px;
+  background: #111;
+  vertical-align: -3px;
+  margin-left: 1px;
+  animation: py-blink 1.05s steps(1) infinite;
+}
+
+.py-loader-root .ghost {
+  color: #d8d8d8;
+}
+
+.py-loader-root .terminal {
+  border-top: 1px solid #ededed;
+  padding-top: 16px;
+  position: relative;
+  height: 124px;
+}
+
+.py-loader-root .terminal-head {
+  font-size: 9px;
+  color: #aaa;
+  letter-spacing: 1.2px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.py-loader-root .runtime {
+  font-size: 9px;
+  letter-spacing: 0;
+  color: #777;
+  min-width: 45px;
+  text-align: right;
+}
+
+.py-loader-root .result {
+  height: 82px;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding-top: 16px;
+}
+
+.py-loader-root .prompt {
+  color: #b0b0b0;
+  font-size: 13px;
+  padding-top: 6px;
+}
+
+.py-loader-root .output {
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: -1.1px;
+  display: flex;
+}
+
+.py-loader-root .output span {
+  display: inline-block;
+  min-width: .60em;
+  will-change: transform, opacity;
+}
+
+.py-loader-root .output-cursor {
+  height: 23px;
+  width: 2px;
+  background: #111;
+  margin-left: 4px;
+  opacity: 0;
+}
+
+.py-loader-root .footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  font-size: 9px;
+  color: #a0a0a0;
+  letter-spacing: 1.3px;
+}
+
+.py-loader-root .meter {
+  display: flex;
+  gap: 3px;
+}
+
+.py-loader-root .meter i {
+  width: 3px;
+  height: 8px;
+  background: #ededed;
+  transition: background .12s, transform .15s;
+  display: inline-block;
+}
+
+.py-loader-root .meter i.on {
+  background: #222;
+  transform: scaleY(1.3);
+}
+
+.py-loader-root .success {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.py-loader-root .opening {
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: -.4px;
+  white-space: pre;
+}
+
+.py-loader-root .opening span {
+  min-width: .60em;
+}
+
+.py-loader-root .error {
+  position: absolute;
+  left: 25px;
+  top: 15px;
+  opacity: 0;
+  font-size: 11px;
+  line-height: 1.9;
+  color: #444;
+}
+
+.py-loader-root .error strong {
+  font-weight: 600;
+  color: #111;
+}
+
+.py-loader-root .error small {
+  font: 10px Consolas, monospace;
+  color: #999;
+}
+
+.py-loader-root .old-code {
+  color: #bbb;
+}
+
+.py-loader-root .opening .output-cursor {
+  display: inline-block;
+  height: 14px;
+  min-width: .60em;
+  width: .60em;
+  margin-left: 3px;
+}
+
+.py-loader-root .scene {
+  will-change: opacity;
+}
+
+@keyframes py-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .py-loader-root .cursor {
+    animation: none;
+  }
+  .py-loader-root .meter i {
+    transition: none;
+  }
+}

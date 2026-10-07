@@ -55,22 +55,8 @@ export default function MenuBar({
         </span>
       </div>
 
-      {/* Right: Page Icon (Plain View Trigger) + System Status */}
+      {/* Right: System Status & Clock */}
       <div className="flex items-center gap-2.5 sm:gap-3.5 font-mono text-[11px]">
-        {onModeChange && (
-          <button
-            type="button"
-            onClick={() => onModeChange("plain")}
-            className="group relative flex items-center justify-center w-6 h-6 rounded transition-all cursor-pointer hover:bg-white/10 active:scale-95"
-            style={{ color: "var(--text-secondary)" }}
-            aria-label="Switch to Plain View"
-          >
-            <FileText size={13} className="group-hover:text-[var(--text-primary)] transition-colors" />
-            <span className="custom-tooltip custom-tooltip-end absolute -bottom-7 px-2 py-0.5 text-[9.5px] font-minecraft rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-              Plain View
-            </span>
-          </button>
-        )}
 
         {visits !== null && (
           <span className="hidden md:flex items-center gap-1.5" style={{ color: "var(--text-faint)" }}>

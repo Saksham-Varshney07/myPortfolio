@@ -9,9 +9,9 @@ export default function Hero({ compact = false }: { compact?: boolean }) {
   const { personal, social } = siteConfig
 
   return (
-    <section className="px-8 pt-8 pb-7 flex flex-col h-full" style={{ minHeight: 0 }}>
-      <div className="mb-6 flex justify-between items-start">
-        <div>
+    <section className="px-6 sm:px-8 pt-6 sm:pt-8 pb-5 sm:pb-7 flex-1 flex flex-col justify-between h-full min-h-0">
+      <div className="mb-4 sm:mb-6 flex justify-between items-start gap-4">
+        <div className="min-w-0">
           <h1
             className="font-press-start tracking-tight mb-5"
             style={{ 

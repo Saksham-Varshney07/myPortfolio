@@ -134,9 +134,6 @@ export default function Projects({ compact = false }: { compact?: boolean }) {
           animate={{ opacity: 1 }}
           className={compact ? "px-6 py-6" : "py-20 px-6"}
         >
-          <p className="font-mono text-[10px] uppercase tracking-[0.14em] mb-5 text-[var(--text-muted)]">
-            Projects
-          </p>
           <ProjectList projects={personalProjects} onPlayVideo={setActiveVideo} />
         </motion.section>
 
@@ -174,11 +171,6 @@ export default function Projects({ compact = false }: { compact?: boolean }) {
       animate={{ opacity: 1 }}
       className={compact ? "px-6 py-6" : "py-20 px-6"}
     >
-      <p
-        className="font-mono text-[10px] uppercase tracking-[0.14em] mb-5 text-[var(--text-muted)]"
-      >
-        Projects
-      </p>
 
       <ProjectList projects={personalProjects} onPlayVideo={setActiveVideo} />
     </motion.section>

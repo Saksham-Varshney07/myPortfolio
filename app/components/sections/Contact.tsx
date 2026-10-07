@@ -17,13 +17,7 @@ export default function Contact({ compact = false }: { compact?: boolean }) {
 
   return (
     <div className={compact ? "px-6 py-6" : "py-20 px-6"}>
-      <p
-        className="font-mono text-[10px] uppercase tracking-[0.14em] mb-2"
-        style={{ color: "var(--text-muted)" }}
-      >
-        Contact
-      </p>
-      <h2 className="text-[22px] font-semibold text-[var(--text-primary)] mb-1">{contact.heading}</h2>
+      <h2 className="font-minecraft-bold text-[20px] font-bold text-[var(--text-primary)] mb-1">{contact.heading}</h2>
       <p className="text-[13px] mb-7" style={{ color: "var(--text-secondary)" }}>
         {contact.subheading}
       </p>

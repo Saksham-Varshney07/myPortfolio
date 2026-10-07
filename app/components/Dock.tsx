@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react"
 import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from "framer-motion"
-import { Github, Linkedin } from "lucide-react"
+import { Github, Linkedin, FileText } from "lucide-react"
 import { SiLeetcode } from "react-icons/si"
 import { siteConfig } from "@/config/siteConfig"
 import { windows } from "@/config/windows"
@@ -19,13 +19,7 @@ function XIcon({ size = 20 }: { size?: number }) {
 type DockItem =
   | { kind: "window"; id: string; label: string; icon: React.ReactNode }
   | { kind: "link"; id: string; label: string; icon: React.ReactNode; url: string }
-
-const dockApps: DockItem[] = windows.map((w) => ({
-  kind: "window",
-  id: w.id,
-  label: w.title,
-  icon: <w.icon size={22} strokeWidth={1.5} aria-hidden="true" />,
-}))
+  | { kind: "action"; id: string; label: string; icon: React.ReactNode; onTrigger: () => void }
 
 const dockLinks: DockItem[] = [
   { kind: "link", id: "github",  label: "GitHub", icon: <Github size={20} strokeWidth={1.5} aria-hidden="true" />, url: siteConfig.social.github },
@@ -123,11 +117,29 @@ function DockIcon({
 export default function Dock({
   openWindows,
   onToggleWindow,
+  onSwitchMode,
 }: {
   openWindows: string[]
   onToggleWindow: (id: string, url?: string) => void
+  onSwitchMode?: (mode: "desktop" | "plain") => void
 }) {
   const mouseX = useMotionValue(Infinity)
+
+  const dockApps: DockItem[] = [
+    ...windows.map((w) => ({
+      kind: "window" as const,
+      id: w.id,
+      label: w.title,
+      icon: <w.icon size={22} strokeWidth={1.5} aria-hidden="true" />,
+    })),
+    {
+      kind: "action" as const,
+      id: "plain-view",
+      label: "Plain View",
+      icon: <FileText size={20} strokeWidth={1.5} aria-hidden="true" />,
+      onTrigger: () => onSwitchMode?.("plain"),
+    },
+  ]
 
   return (
     <nav
@@ -148,8 +160,14 @@ export default function Dock({
             key={item.id}
             item={item}
             mouseX={mouseX}
-            isOpen={openWindows.includes(item.id)}
-            onActivate={() => onToggleWindow(item.id)}
+            isOpen={item.kind === "window" ? openWindows.includes(item.id) : false}
+            onActivate={() => {
+              if (item.kind === "window") {
+                onToggleWindow(item.id)
+              } else if (item.kind === "action") {
+                item.onTrigger()
+              }
+            }}
           />
         ))}
 

@@ -33,7 +33,7 @@ export interface WindowDef {
 }
 
 export const windows: WindowDef[] = [
-  { id: "about", title: "About", icon: CircleUserRound, width: 660, height: 540, offsetX: 0, offsetY: 30, component: Hero },
+  { id: "about", title: "About", icon: CircleUserRound, width: 660, height: 500, offsetX: 0, offsetY: 30, component: Hero },
   { id: "experience", title: "Experience", icon: Compass, width: 680, height: 570, offsetX: 0, offsetY: 40, component: Experience },
   { id: "projects", title: "Projects", icon: Blocks, width: 720, height: 570, offsetX: 0, offsetY: 40, component: Projects },
   { id: "contact", title: "Contact", icon: Send, width: 460, height: 420, offsetX: 0, offsetY: 40, component: Contact },
