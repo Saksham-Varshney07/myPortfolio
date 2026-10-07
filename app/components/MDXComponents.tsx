@@ -16,13 +16,15 @@ import Link from "next/link"
 export const mdxComponents: MDXComponents = {
   h1: (props) => (
     <h1
-      className="text-[22px] font-semibold text-white leading-tight mt-6 mb-3"
+      className="text-[22px] font-semibold leading-tight mt-6 mb-3"
+      style={{ color: "var(--text-primary)" }}
       {...props}
     />
   ),
   h2: (props) => (
     <h2
-      className="text-[16px] font-semibold text-white/90 mt-6 mb-2"
+      className="text-[16px] font-semibold mt-6 mb-2"
+      style={{ color: "var(--text-primary)" }}
       {...props}
     />
   ),
@@ -43,14 +45,15 @@ export const mdxComponents: MDXComponents = {
   a: ({ href = "", ...rest }) => {
     const isInternal = href.startsWith("/") || href.startsWith("#")
     if (isInternal) {
-      return <Link href={href} className="underline underline-offset-2 hover:text-white" {...rest} />
+      return <Link href={href} className="underline underline-offset-2 hover:opacity-70 transition-opacity" style={{ color: "var(--text-primary)" }} {...rest} />
     }
     return (
       <a
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="underline underline-offset-2 hover:text-white"
+        className="underline underline-offset-2 hover:opacity-70 transition-opacity"
+        style={{ color: "var(--text-primary)" }}
         {...rest}
       />
     )
@@ -58,7 +61,7 @@ export const mdxComponents: MDXComponents = {
   ul: (props) => <ul className="list-disc pl-5 space-y-1.5 mb-4 text-[13px]" style={{ color: "var(--text-secondary)" }} {...props} />,
   ol: (props) => <ol className="list-decimal pl-5 space-y-1.5 mb-4 text-[13px]" style={{ color: "var(--text-secondary)" }} {...props} />,
   li: (props) => <li className="leading-[1.7]" {...props} />,
-  strong: (props) => <strong className="text-white/90 font-semibold" {...props} />,
+  strong: (props) => <strong className="font-semibold" style={{ color: "var(--text-primary)" }} {...props} />,
   em: (props) => <em className="italic" {...props} />,
   blockquote: (props) => (
     <blockquote

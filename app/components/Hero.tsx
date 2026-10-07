@@ -9,20 +9,24 @@ export default function Hero({ compact = false }: { compact?: boolean }) {
   const { personal, social } = siteConfig
 
   return (
-    <section className="px-6 pt-7 pb-6 flex flex-col h-full" style={{ minHeight: 0 }}>
-      <div className="mb-5 flex justify-between items-start">
+    <section className="px-8 pt-8 pb-7 flex flex-col h-full" style={{ minHeight: 0 }}>
+      <div className="mb-6 flex justify-between items-start">
         <div>
           <h1
-            className="font-semibold tracking-tight leading-[0.92] mb-3"
-            style={{ fontSize: compact ? 46 : 56, color: "var(--text-primary)" }}
+            className="font-press-start tracking-tight mb-5"
+            style={{ 
+              fontSize: compact ? 29 : 34, 
+              lineHeight: 1.25,
+              color: "var(--text-primary)" 
+            }}
           >
             {personal.firstName}<br />{personal.lastName}
           </h1>
-          <p className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: "var(--text-secondary)" }}>
+          <p className="font-mono text-[10.5px] uppercase tracking-[0.14em]" style={{ color: "var(--text-secondary)" }}>
             {personal.role}
           </p>
         </div>
-        <div className="relative w-28 h-28 rounded-full overflow-hidden flex-none shadow-xl" style={{ border: "1px solid var(--window-border-unfocused)" }}>
+        <div className="relative w-32 h-32 rounded-full overflow-hidden flex-none shadow-xl" style={{ border: "1px solid var(--window-border-unfocused)" }}>
           <Image 
             src={personal.avatar} 
             alt="" 
@@ -34,14 +38,14 @@ export default function Hero({ compact = false }: { compact?: boolean }) {
         </div>
       </div>
 
-      <div style={{ height: 1, background: "var(--separator)", marginBottom: 20 }} />
+      <div style={{ height: 1, background: "var(--separator)", marginBottom: 22 }} />
 
-      <div className="flex flex-col gap-3">
-        <p className="text-[13px] leading-[1.75]" style={{ color: "var(--text-secondary)" }}>
+      <div className="flex flex-col gap-3.5">
+        <p className="text-[14px] leading-[1.8]" style={{ color: "var(--text-secondary)" }}>
           {personal.tagline}
         </p>
         {personal.hobbies && (
-          <p className="text-[13px] leading-[1.75]" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-[14px] leading-[1.8]" style={{ color: "var(--text-secondary)" }}>
             {personal.hobbies}
           </p>
         )}

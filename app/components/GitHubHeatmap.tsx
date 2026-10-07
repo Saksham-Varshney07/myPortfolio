@@ -19,9 +19,19 @@ export interface Contribution {
   level: 0 | 1 | 2 | 3 | 4
 }
 
+// ─── UI Sizing Config ──────────────────────────────────────────────────────────
+// Easily adjust dimensions, grid size, and weeks shown for the GitHub widget:
+export const HEATMAP_CONFIG = {
+  widgetWidth: 440,                  // Card width in pixels (increase to e.g. 450 or 480)
+  widgetHeight: undefined as number | undefined, // Card height in pixels (e.g. 180, 200), or undefined to fit content
+  cell: 10,                          // Size of each contribution day square (e.g. 10, 11, 12)
+  gap: 3,                            // Spacing between squares in pixels
+  weeksCount: 29,                    // Number of weeks shown horizontally (e.g. 29, 32, 35)
+}
 
 
-const MONTH_LABELS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+
+const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 export default function GitHubHeatmap() {
   const [contributions, setContributions] = useState<Contribution[]>([])
@@ -68,7 +78,7 @@ export default function GitHubHeatmap() {
     }
   }
 
-  const displayWeeks = weeks.slice(-29)
+  const displayWeeks = weeks.slice(-HEATMAP_CONFIG.weeksCount)
 
   let monthPositions: { label: string; col: number }[] = []
   if (displayWeeks.length > 0) {
@@ -83,7 +93,7 @@ export default function GitHubHeatmap() {
         }
       }
     })
-    
+
     const filteredPositions = []
     let nextCol = 10000
     for (let i = monthPositions.length - 1; i >= 0; i--) {
@@ -95,8 +105,8 @@ export default function GitHubHeatmap() {
     monthPositions = filteredPositions
   }
 
-  const CELL = 10
-  const GAP = 3
+  const CELL = HEATMAP_CONFIG.cell
+  const GAP = HEATMAP_CONFIG.gap
   const colWidth = CELL + GAP
 
 
@@ -114,93 +124,99 @@ export default function GitHubHeatmap() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
       className="relative select-none"
-      style={
-        isTetrisMode 
-          ? { width: 409, marginRight: 351, marginTop: -255, zIndex: 5 } 
-          : { width: 409, marginRight: 0, zIndex: 5 } 
-      }
+      style={{
+        width: HEATMAP_CONFIG.widgetWidth,
+        ...(HEATMAP_CONFIG.widgetHeight ? { height: HEATMAP_CONFIG.widgetHeight } : {}),
+        ...(isTetrisMode ? { marginRight: 351, marginTop: -255, zIndex: 5 } : { marginRight: 0, zIndex: 5 }),
+      }}
     >
-      <div className="widget-handle" onPointerDown={(e) => dragControls.start(e)}>
-        <div style={{ width: 24, height: 2, borderRadius: 1, background: "var(--text-faint)" }} />
-      </div>
-
-      <div className="widget-body px-4 pt-3 pb-3">
-        <div className="flex flex-wrap items-center justify-between mb-2.5 gap-2">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5">
-              <Github size={11} style={{ color: "var(--text-muted)" }} />
-              <span className="text-[10px] font-medium" style={{ color: "var(--text-secondary)" }}>
-                {siteConfig.social.githubUsername}
-              </span>
-            </div>
-            {isTetrisMode ? (
-              <button
-                onClick={() => setIsTetrisMode(false)}
-                className="text-[9px] px-2 py-0.5 rounded-sm font-mono transition-colors cursor-pointer"
-                style={{ background: "rgba(255,100,100,0.1)", color: "rgba(255,100,100,0.8)", border: "1px solid rgba(255,100,100,0.2)" }}
-              >
-                Exit Game
-              </button>
-            ) : (
-              <button
-                onClick={() => setIsTetrisMode(true)}
-                className="text-[9px] px-2 py-0.5 rounded-sm font-mono transition-colors hover:opacity-80 cursor-pointer"
-                style={{ background: "var(--accent-subtle)", color: "var(--accent)", border: "1px solid var(--accent-subtle)" }}
-              >
-                Play Tetris
-              </button>
-            )}
-          </div>
-          {!isTetrisMode && total > 0 && (
-            <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-              {total.toLocaleString()} contributions this year
-            </span>
-          )}
+      <div className="retroui-card overflow-hidden flex flex-col h-full">
+        <div
+          className="flex items-center justify-center cursor-grab active:cursor-grabbing"
+          style={{ height: 22, background: "var(--drag-handle-bg)", borderBottom: "1px solid var(--separator)" }}
+          onPointerDown={(e) => dragControls.start(e)}
+        >
+          <div style={{ width: 24, height: 2, borderRadius: 1, background: "var(--text-faint)" }} />
         </div>
 
-        {isTetrisMode ? (
-          <TetrisGame />
-        ) : displayWeeks.length === 0 ? (
-          <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>No data</div>
-        ) : (
-          <div>
-            <div style={{ position: "relative", height: 14, marginBottom: 2, width: displayWeeks.length * colWidth }}>
-              {monthPositions.map(({ label, col }) => (
-                <span
-                  key={`${label}-${col}`}
-                  style={{
-                    position: "absolute",
-                    left: col * colWidth,
-                    fontSize: 9,
-                    color: "var(--text-muted)",
-                    lineHeight: "14px",
-                  }}
-                >
-                  {label}
+        <div className="px-4 pt-3 pb-3">
+          <div className="flex flex-wrap items-center justify-between mb-2.5 gap-2">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
+                <Github size={11} style={{ color: "var(--text-muted)" }} />
+                <span className="text-[10px] font-medium" style={{ color: "var(--text-secondary)" }}>
+                  {siteConfig.social.githubUsername}
                 </span>
-              ))}
+              </div>
+              {isTetrisMode ? (
+                <button
+                  onClick={() => setIsTetrisMode(false)}
+                  className="text-[9px] px-2 py-0.5 rounded-sm font-mono transition-colors cursor-pointer"
+                  style={{ background: "rgba(255,100,100,0.1)", color: "rgba(255,100,100,0.8)", border: "1px solid rgba(255,100,100,0.2)" }}
+                >
+                  Exit Game
+                </button>
+              ) : (
+                <button
+                  onClick={() => setIsTetrisMode(true)}
+                  className="text-[9px] px-2 py-0.5 rounded-sm font-mono transition-colors hover:opacity-80 cursor-pointer"
+                  style={{ background: "var(--accent-subtle)", color: "var(--accent)", border: "1px solid var(--accent-subtle)" }}
+                >
+                  Play Tetris
+                </button>
+              )}
             </div>
-
-            <div style={{ display: "flex", gap: GAP }}>
-              {displayWeeks.map((week, wi) => (
-                <div key={wi} style={{ display: "flex", flexDirection: "column", gap: GAP }}>
-                  {week.map((day, di) => (
-                    <div
-                      key={di}
-                      title={day ? `${day.date}: ${day.count} contributions` : ""}
-                      style={{
-                        width: CELL,
-                        height: CELL,
-                        borderRadius: 2,
-                        background: day ? LEVEL_COLORS[day.level] : "transparent",
-                      }}
-                    />
-                  ))}
-                </div>
-              ))}
-            </div>
+            {!isTetrisMode && total > 0 && (
+              <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+                {total.toLocaleString()} contributions this year
+              </span>
+            )}
           </div>
-        )}
+
+          {isTetrisMode ? (
+            <TetrisGame />
+          ) : displayWeeks.length === 0 ? (
+            <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>No data</div>
+          ) : (
+            <div>
+              <div style={{ position: "relative", height: 14, marginBottom: 2, width: displayWeeks.length * colWidth }}>
+                {monthPositions.map(({ label, col }) => (
+                  <span
+                    key={`${label}-${col}`}
+                    style={{
+                      position: "absolute",
+                      left: col * colWidth,
+                      fontSize: 9,
+                      color: "var(--text-muted)",
+                      lineHeight: "14px",
+                    }}
+                  >
+                    {label}
+                  </span>
+                ))}
+              </div>
+
+              <div style={{ display: "flex", gap: GAP }}>
+                {displayWeeks.map((week, wi) => (
+                  <div key={wi} style={{ display: "flex", flexDirection: "column", gap: GAP }}>
+                    {week.map((day, di) => (
+                      <div
+                        key={di}
+                        title={day ? `${day.date}: ${day.count} contributions` : ""}
+                        style={{
+                          width: CELL,
+                          height: CELL,
+                          borderRadius: 2,
+                          background: day ? LEVEL_COLORS[day.level] : "transparent",
+                        }}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </motion.div>
   )

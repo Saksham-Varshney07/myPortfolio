@@ -71,7 +71,7 @@ export default function Window({
           style={{
             position: "fixed",
             left: `calc(50% - min(${width}px, calc(100vw - 32px)) / 2 + ${offsetX}px)`,
-            top: `clamp(80px, calc(50% - ${height / 2}px + ${offsetY}px - 16px), calc(100vh - min(${height}px, calc(100vh - 72px)) - 40px))`,
+            top: `clamp(115px, calc(50% - ${height / 2}px + ${offsetY}px + 30px), calc(100vh - min(${height}px, calc(100vh - 140px)) - 20px))`,
             width: `min(${width}px, calc(100vw - 32px))`,
             zIndex,
             outline: "none",
@@ -82,17 +82,28 @@ export default function Window({
           dragListener={false}
           dragMomentum={false}
           dragElastic={0}
-          initial={{ scale: 0.94, opacity: 0, y: 8, x: savedOffset.current.x, ...(savedOffset.current.y ? { y: savedOffset.current.y } : {}) }}
+          initial={{ 
+            scale: 0.92, 
+            opacity: 0, 
+            y: (savedOffset.current.y || 0) + 14, 
+            x: savedOffset.current.x 
+          }}
           animate={{ 
-            scale: isMinimized ? 0.4 : 1, 
+            scale: isMinimized ? 0.92 : 1, 
             opacity: isMinimized ? 0 : 1, 
             x: savedOffset.current.x, 
-            y: isMinimized ? (savedOffset.current.y || 0) + 200 : savedOffset.current.y 
+            y: isMinimized ? (savedOffset.current.y || 0) + 14 : (savedOffset.current.y || 0) 
           }}
-          exit={{ scale: 0.94, opacity: 0, y: (savedOffset.current.y || 0) + 8, transition: { duration: 0.12 } }}
+          exit={{ 
+            scale: 0.92, 
+            opacity: 0, 
+            y: (savedOffset.current.y || 0) + 14 
+          }}
           transition={{ 
-            type: "spring", damping: 32, stiffness: 420,
-            opacity: { duration: 0.15, ease: "easeOut" }
+            type: "spring", 
+            damping: 28, 
+            stiffness: 380,
+            opacity: { duration: 0.18, ease: "easeInOut" }
           }}
           onPointerDown={onFocus}
           onDragEnd={(_, info) => {
@@ -101,76 +112,70 @@ export default function Window({
         >
           <div
             data-mac-window
-            className="flex flex-col overflow-hidden"
+            className="retroui-card flex flex-col overflow-hidden"
             style={{
-              height: `min(${height}px, calc(100vh - 72px))`,
-              borderRadius: 8,
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
-              border: isFocused
-                ? "1px solid var(--window-border-focused)"
-                : "1px solid var(--window-border-unfocused)",
-              boxShadow: isFocused
-                ? "0 40px 80px rgba(0,0,0,0.9), 0 0 0 0.5px rgba(0,0,0,1)"
-                : "0 16px 40px rgba(0,0,0,0.7), 0 0 0 0.5px rgba(0,0,0,1)",
+              height: `min(${height}px, calc(100vh - 140px))`,
               transition: "box-shadow 0.2s ease, border-color 0.2s ease",
             }}
           >
             <div
-              className="flex-none flex items-center h-9 pl-3 relative select-none cursor-grab active:cursor-grabbing"
+              className="flex-none flex items-center justify-between h-10 px-0 relative select-none cursor-grab active:cursor-grabbing"
               style={{
                 background: "var(--titlebar-bg)",
                 borderBottom: "1px solid var(--window-border-unfocused)",
               }}
               onPointerDown={(e) => dragControls.start(e)}
             >
-              <h2
-                id={titleId}
-                className="absolute left-1/2 -translate-x-1/2 font-mono text-[10px] uppercase tracking-[0.1em] pointer-events-none m-0 font-normal"
-                style={{
-                  color: isFocused ? "var(--text-secondary)" : "var(--text-faint)",
-                  transition: "color 0.2s",
-                }}
-              >
-                {title}
-              </h2>
+              {/* Perfectly centered title with Minecraft font */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <h2
+                  id={titleId}
+                  className="font-minecraft text-[13px] uppercase tracking-[0.14em] m-0 font-bold select-none"
+                  style={{
+                    color: isFocused ? "var(--text-primary)" : "var(--text-muted)",
+                    transition: "color 0.2s",
+                  }}
+                >
+                  {title}
+                </h2>
+              </div>
 
-              <div className="ml-auto flex items-center h-full z-10" style={{ color: "var(--text-secondary)" }}>
+              <div className="ml-auto flex items-center h-full relative z-10" style={{ color: "var(--text-secondary)" }}>
                 <button
                   type="button"
                   aria-hidden="true"
-                  className="h-full px-3.5 flex items-center justify-center transition-colors"
+                  className="h-full w-11 sm:w-12 flex items-center justify-center transition-colors cursor-pointer"
                   style={{ color: "inherit" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--window-border-focused)"; e.currentTarget.style.color = "var(--text-primary)"; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--accent-subtle)"; e.currentTarget.style.color = "var(--text-primary)"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "inherit"; }}
                   onClick={(e) => { e.stopPropagation(); playClickSound(); onMinimize?.(); }}
                   onPointerDown={(e) => e.stopPropagation()}
                 >
-                  <Minus size={15} strokeWidth={1.5} />
+                  <Minus size={17} strokeWidth={2} />
                 </button>
                 <button
                   type="button"
                   aria-hidden="true"
-                  className="h-full px-3.5 flex items-center justify-center transition-colors"
+                  className="h-full w-11 sm:w-12 flex items-center justify-center transition-colors cursor-pointer"
                   style={{ color: "inherit" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--window-border-focused)"; e.currentTarget.style.color = "var(--text-primary)"; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--accent-subtle)"; e.currentTarget.style.color = "var(--text-primary)"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "inherit"; }}
                   onClick={(e) => e.stopPropagation()}
                   onPointerDown={(e) => e.stopPropagation()}
                 >
-                  <Square size={13} strokeWidth={1.5} />
+                  <Square size={14} strokeWidth={2} />
                 </button>
                 <button
                   type="button"
                   aria-label={`Close ${title}`}
-                  className="h-full px-3.5 flex items-center justify-center transition-colors"
+                  className="h-full w-11 sm:w-12 flex items-center justify-center transition-colors cursor-pointer"
                   style={{ color: "inherit" }}
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#E81123"; e.currentTarget.style.color = "#ffffff"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "inherit"; }}
                   onClick={(e) => { e.stopPropagation(); playClickSound(); onClose() }}
                   onPointerDown={(e) => e.stopPropagation()}
                 >
-                  <X size={16} strokeWidth={1.5} />
+                  <X size={18} strokeWidth={2} />
                 </button>
               </div>
             </div>

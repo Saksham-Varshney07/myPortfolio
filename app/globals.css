@@ -1,55 +1,123 @@
 @import "tailwindcss";
+@import "pixel-retroui/dist/index.css";
+
+@font-face {
+  font-family: 'Minecraft';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/Minecraft.otf') format('opentype');
+}
+
+@font-face {
+  font-family: 'Minecraft';
+  font-style: normal;
+  font-weight: 700;
+  src: url('/fonts/Minecraft-Bold.otf') format('opentype');
+}
+
+.font-minecraft {
+  font-family: 'Minecraft', monospace, sans-serif !important;
+}
+
+.font-minecraft-bold {
+  font-family: 'Minecraft', monospace, sans-serif !important;
+  font-weight: 700 !important;
+}
+
+@font-face {
+  font-family: 'PressStart';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/PressStart2P.ttf') format('truetype');
+}
+
+.font-press-start {
+  font-family: 'PressStart', 'Press Start 2P', monospace, sans-serif !important;
+}
 
 :root {
-  --background: #0b0b0b;
-  --foreground: #f0f0f0;
-  --text-primary: rgba(255,255,255,0.85);
-  --text-secondary: hsla(185, 40%, 80%, 0.5);
-  --text-muted: hsla(185, 40%, 70%, 0.3);
-  --text-faint: hsla(185, 40%, 60%, 0.2);
+  --font-app: 'Minecraft', monospace, sans-serif;
+
+  /* RetroUI Canvas & Text - Default Dark */
+  --background: #000000;
+  --foreground: #ffffff;
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.82);
+  --text-muted: rgba(255, 255, 255, 0.6);
+  --text-faint: rgba(255, 255, 255, 0.38);
 
   /* window / surface */
-  --bg-base: hsla(185, 40%, 6%, 0.7);
-  --bg-dot: hsla(185, 80%, 60%, 0.05);
-  --titlebar-bg: hsla(185, 50%, 8%, 0.85);
-  --window-bg: hsla(185, 50%, 10%, 0.9);
-  --terminal-bg: hsla(185, 50%, 6%, 0.85);
-  --menubar-bg: hsla(185, 40%, 6%, 0.85);
-  --window-border-focused: hsla(185, 80%, 60%, 0.3);
-  --window-border-unfocused: hsla(185, 80%, 60%, 0.1);
+  --bg-base: #000000;
+  --bg-dot: rgba(255, 255, 255, 0.08);
+  --titlebar-bg: #0a0a0a;
+  --window-bg: #000000;
+  --terminal-bg: #000000;
+  --menubar-bg: #0a0a0a;
+  --window-border-focused: #ffffff;
+  --window-border-unfocused: rgba(255, 255, 255, 0.5);
 
   /* widgets + dock */
-  --widget-bg: hsla(185, 50%, 8%, 0.9);
-  --widget-border: hsla(185, 80%, 60%, 0.12);
-  --drag-handle-bg: hsla(185, 80%, 60%, 0.04);
-  --item-separator: hsla(185, 80%, 60%, 0.07);
-  --dock-bg: hsla(185, 50%, 6%, 0.93);
-  --tooltip-bg: hsla(185, 50%, 8%, 0.98);
+  --widget-bg: #000000;
+  --widget-border: #ffffff;
+  --drag-handle-bg: #0a0a0a;
+  --item-separator: rgba(255, 255, 255, 0.12);
+  --dock-bg: #000000;
+  --tooltip-bg: #111111;
 
   /* accent */
-  --accent: hsla(185, 80%, 60%, 0.9);
-  --accent-subtle: hsla(185, 80%, 60%, 0.18);
+  --accent: #ffffff;
+  --accent-subtle: rgba(255, 255, 255, 0.16);
 
   /* GitHub heatmap */
-  --heatmap-empty: hsla(185, 80%, 60%, 0.07);
+  --heatmap-empty: rgba(255, 255, 255, 0.08);
 
   /* separator */
-  --separator: hsla(185, 80%, 60%, 0.08);
+  --separator: rgba(255, 255, 255, 0.15);
 
   /* wallpaper */
-  --wallpaper-bg: radial-gradient(circle at 35% 35%, hsla(185, 80%, 30%, 1) 0%, hsla(215, 60%, 15%, 1) 45%, hsla(255, 50%, 5%, 1) 100%);
-  --wallpaper-opacity: 1;
+  --wallpaper-bg: transparent;
+  --wallpaper-opacity: 0;
   --indicator-color: #4ade80;
+
+  /* RetroUI Shape & Shadow Tokens */
+  --window-radius: 0px;
+  --window-shadow-focused: 4px 4px 0px #ffffff;
+  --window-shadow-unfocused: 2px 2px 0px rgba(255, 255, 255, 0.5);
+  --window-border-style: 2px solid #ffffff;
+  --widget-handle-radius: 0px;
+  --widget-body-radius: 0px;
+  --widget-border-style: 2px solid #ffffff;
+  --widget-shadow: 3px 3px 0px #ffffff;
+  --dock-radius: 0px;
+  --dock-border-style: 2px solid #ffffff;
+  --dock-shadow: 4px 4px 0px #ffffff;
+  --dock-button-radius: 0px;
+  --dock-button-border: 1px solid rgba(255, 255, 255, 0.2);
+  --btn-shadow: 2px 2px 0px #ffffff;
+  --menubar-border-bottom: 2px solid #ffffff;
+
+  /* RetroUI library internal variables */
+  --retroui-border-svg-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M3 1h1v1h-1zM4 1h1v1h-1zM2 2h1v1h-1zM5 2h1v1h-1zM1 3h1v1h-1zM6 3h1v1h-1zM1 4h1v1h-1zM6 4h1v1h-1zM2 5h1v1h-1zM5 5h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1z' fill='%23000000'/%3E%3C/svg%3E");
+  --retroui-border-svg-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M3 1h1v1h-1zM4 1h1v1h-1zM2 2h1v1h-1zM5 2h1v1h-1zM1 3h1v1h-1zM6 3h1v1h-1zM1 4h1v1h-1zM6 4h1v1h-1zM2 5h1v1h-1zM5 5h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1z' fill='%23ffffff'/%3E%3C/svg%3E");
+  --card-border-svg: var(--retroui-border-svg-dark);
+  --primary-bg: #ffffff;
+  --primary-text: #000000;
+  --secondary-bg: #111111;
+  --secondary-text: #ffffff;
+  --bg-card: #000000;
+  --text-card: #ffffff;
+  --border-card: #ffffff;
+  --shadow-card: #ffffff;
 }
 
 [data-mobile-theme="light"] {
   --background: #f7f7f7;
   --foreground: #111111;
-  --text-primary: rgba(0,0,0,0.9);
-  --text-secondary: rgba(0,0,0,0.7);
-  --text-muted: rgba(0,0,0,0.5);
-  --text-faint: rgba(0,0,0,0.2);
-  --separator: rgba(0,0,0,0.1);
+  --text-primary: rgba(0, 0, 0, 0.9);
+  --text-secondary: rgba(0, 0, 0, 0.7);
+  --text-muted: rgba(0, 0, 0, 0.5);
+  --text-faint: rgba(0, 0, 0, 0.2);
+  --separator: rgba(0, 0, 0, 0.1);
   --bg-base: #ffffff;
   --indicator-color: #22c55e;
 }
@@ -57,86 +125,86 @@
 
 /* ── Amber — deep violet night with warm amber horizon ────────────────────── */
 [data-theme="amber"] {
-  --bg-base: rgba(6,4,18,0.65);
-  --bg-dot: rgba(255,170,60,0.055);
-  --titlebar-bg: rgba(12,8,32,0.82);
-  --window-bg: rgba(16,10,40,0.88);
-  --terminal-bg: rgba(8,5,24,0.85);
-  --menubar-bg: rgba(6,4,18,0.82);
-  --window-border-focused: rgba(255,175,65,0.28);
-  --window-border-unfocused: rgba(255,160,50,0.1);
+  --bg-base: rgba(6, 4, 18, 0.65);
+  --bg-dot: rgba(255, 170, 60, 0.055);
+  --titlebar-bg: rgba(12, 8, 32, 0.82);
+  --window-bg: rgba(16, 10, 40, 0.88);
+  --terminal-bg: rgba(8, 5, 24, 0.85);
+  --menubar-bg: rgba(6, 4, 18, 0.82);
+  --window-border-focused: rgba(255, 175, 65, 0.28);
+  --window-border-unfocused: rgba(255, 160, 50, 0.1);
 
-  --widget-bg: rgba(14,9,36,0.90);
-  --widget-border: rgba(255,175,65,0.12);
-  --drag-handle-bg: rgba(255,175,65,0.04);
-  --item-separator: rgba(255,175,65,0.07);
-  --dock-bg: rgba(10,6,28,0.93);
-  --tooltip-bg: rgba(12,8,32,0.98);
+  --widget-bg: rgba(14, 9, 36, 0.90);
+  --widget-border: rgba(255, 175, 65, 0.12);
+  --drag-handle-bg: rgba(255, 175, 65, 0.04);
+  --item-separator: rgba(255, 175, 65, 0.07);
+  --dock-bg: rgba(10, 6, 28, 0.93);
+  --tooltip-bg: rgba(12, 8, 32, 0.98);
 
-  --accent: rgba(255,175,65,0.9);
-  --accent-subtle: rgba(255,175,65,0.16);
-  --heatmap-empty: rgba(255,175,65,0.07);
-  --separator: rgba(255,175,65,0.08);
+  --accent: rgba(255, 175, 65, 0.9);
+  --accent-subtle: rgba(255, 175, 65, 0.16);
+  --heatmap-empty: rgba(255, 175, 65, 0.07);
+  --separator: rgba(255, 175, 65, 0.08);
 
-  --text-secondary: rgba(255,215,150,0.48);
-  --text-muted: rgba(255,200,120,0.26);
-  --text-faint: rgba(255,185,90,0.2);
+  --text-secondary: rgba(255, 215, 150, 0.48);
+  --text-muted: rgba(255, 200, 120, 0.26);
+  --text-faint: rgba(255, 185, 90, 0.2);
 }
 
 /* ── Crimson — near-black base with deep crimson accents ──────────────────── */
 [data-theme="crimson"] {
-  --bg-base: rgba(10,1,3,0.68);
-  --bg-dot: rgba(200,18,38,0.055);
-  --titlebar-bg: rgba(18,2,5,0.84);
-  --window-bg: rgba(22,3,7,0.90);
-  --terminal-bg: rgba(14,2,4,0.86);
-  --menubar-bg: rgba(10,1,3,0.84);
-  --window-border-focused: rgba(210,25,50,0.30);
-  --window-border-unfocused: rgba(190,15,35,0.10);
+  --bg-base: rgba(10, 1, 3, 0.68);
+  --bg-dot: rgba(200, 18, 38, 0.055);
+  --titlebar-bg: rgba(18, 2, 5, 0.84);
+  --window-bg: rgba(22, 3, 7, 0.90);
+  --terminal-bg: rgba(14, 2, 4, 0.86);
+  --menubar-bg: rgba(10, 1, 3, 0.84);
+  --window-border-focused: rgba(210, 25, 50, 0.30);
+  --window-border-unfocused: rgba(190, 15, 35, 0.10);
 
-  --widget-bg: rgba(20,2,6,0.90);
-  --widget-border: rgba(210,25,50,0.12);
-  --drag-handle-bg: rgba(200,18,38,0.04);
-  --item-separator: rgba(210,25,50,0.07);
-  --dock-bg: rgba(14,1,4,0.93);
-  --tooltip-bg: rgba(16,2,5,0.98);
+  --widget-bg: rgba(20, 2, 6, 0.90);
+  --widget-border: rgba(210, 25, 50, 0.12);
+  --drag-handle-bg: rgba(200, 18, 38, 0.04);
+  --item-separator: rgba(210, 25, 50, 0.07);
+  --dock-bg: rgba(14, 1, 4, 0.93);
+  --tooltip-bg: rgba(16, 2, 5, 0.98);
 
-  --accent: rgba(210,30,55,0.9);
-  --accent-subtle: rgba(210,30,55,0.18);
-  --heatmap-empty: rgba(200,20,40,0.07);
-  --separator: rgba(210,25,50,0.08);
+  --accent: rgba(210, 30, 55, 0.9);
+  --accent-subtle: rgba(210, 30, 55, 0.18);
+  --heatmap-empty: rgba(200, 20, 40, 0.07);
+  --separator: rgba(210, 25, 50, 0.08);
 
-  --text-secondary: rgba(255,140,140,0.48);
-  --text-muted: rgba(255,110,110,0.26);
-  --text-faint: rgba(255,100,100,0.2);
+  --text-secondary: rgba(255, 140, 140, 0.48);
+  --text-muted: rgba(255, 110, 110, 0.26);
+  --text-faint: rgba(255, 100, 100, 0.2);
 }
 
 /* ── Rust — warm black base with burnt orange accents ─────────────────────── */
 [data-theme="rust"] {
-  --bg-base: rgba(12,6,0,0.68);
-  --bg-dot: rgba(255,115,25,0.06);
-  --titlebar-bg: rgba(22,10,0,0.84);
-  --window-bg: rgba(28,13,0,0.90);
-  --terminal-bg: rgba(18,8,0,0.86);
-  --menubar-bg: rgba(12,6,0,0.84);
-  --window-border-focused: rgba(255,120,35,0.28);
-  --window-border-unfocused: rgba(240,100,20,0.10);
+  --bg-base: rgba(12, 6, 0, 0.68);
+  --bg-dot: rgba(255, 115, 25, 0.06);
+  --titlebar-bg: rgba(22, 10, 0, 0.84);
+  --window-bg: rgba(28, 13, 0, 0.90);
+  --terminal-bg: rgba(18, 8, 0, 0.86);
+  --menubar-bg: rgba(12, 6, 0, 0.84);
+  --window-border-focused: rgba(255, 120, 35, 0.28);
+  --window-border-unfocused: rgba(240, 100, 20, 0.10);
 
-  --widget-bg: rgba(24,11,0,0.90);
-  --widget-border: rgba(255,120,35,0.12);
-  --drag-handle-bg: rgba(255,115,25,0.04);
-  --item-separator: rgba(255,115,25,0.07);
-  --dock-bg: rgba(16,7,0,0.93);
-  --tooltip-bg: rgba(18,8,0,0.98);
+  --widget-bg: rgba(24, 11, 0, 0.90);
+  --widget-border: rgba(255, 120, 35, 0.12);
+  --drag-handle-bg: rgba(255, 115, 25, 0.04);
+  --item-separator: rgba(255, 115, 25, 0.07);
+  --dock-bg: rgba(16, 7, 0, 0.93);
+  --tooltip-bg: rgba(18, 8, 0, 0.98);
 
-  --accent: rgba(255,120,35,0.9);
-  --accent-subtle: rgba(255,120,35,0.18);
-  --heatmap-empty: rgba(255,115,25,0.07);
-  --separator: rgba(255,115,25,0.08);
+  --accent: rgba(255, 120, 35, 0.9);
+  --accent-subtle: rgba(255, 120, 35, 0.18);
+  --heatmap-empty: rgba(255, 115, 25, 0.07);
+  --separator: rgba(255, 115, 25, 0.08);
 
-  --text-secondary: rgba(255,200,130,0.48);
-  --text-muted: rgba(255,180,100,0.26);
-  --text-faint: rgba(255,165,80,0.2);
+  --text-secondary: rgba(255, 200, 130, 0.48);
+  --text-muted: rgba(255, 180, 100, 0.26);
+  --text-faint: rgba(255, 165, 80, 0.2);
 }
 
 @theme inline {
@@ -149,7 +217,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, sans-serif;
+  font-family: var(--font-app, 'Minecraft', monospace, sans-serif);
 }
 
 body::after {
@@ -163,8 +231,24 @@ body::after {
 }
 
 .desktop-bg {
-  background:
-    radial-gradient(circle, var(--bg-dot) 1px, transparent 1px) 0 0 / 28px 28px var(--bg-base);
+  background-color: var(--bg-base);
+  background-image:
+    linear-gradient(to right, var(--bg-dot) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--bg-dot) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.solace-shader-bg {
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+  opacity: 1;
+  visibility: visible;
+}
+
+[data-theme="light"] .solace-shader-bg,
+[data-theme-video="true"] .solace-shader-bg {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 .album-wallpaper {
@@ -179,6 +263,55 @@ body::after {
   background: var(--wallpaper-bg, transparent);
 }
 
+.retroui-card,
+[class*="pixelCard"] {
+  background-color: var(--card-custom-bg, var(--bg-card, #ffffff));
+  border-color: var(--card-custom-border, var(--border-card, #000000));
+  border-image-source: var(--card-border-svg);
+  border-image-slice: 3;
+  border-image-width: 2;
+  border-image-repeat: stretch;
+  border-image-outset: 2;
+  border-style: solid;
+  border-width: 5px;
+  box-shadow: 2px 2px 0 2px var(--card-custom-shadow, var(--shadow-card, #000000)), -2px -2px 0 2px var(--card-custom-bg, var(--bg-card, #ffffff));
+  color: var(--card-custom-text, var(--text-card, #000000));
+}
+
+.retroui-dock-button {
+  background-color: var(--card-custom-bg, var(--bg-card, #ffffff));
+  border-color: var(--card-custom-border, var(--border-card, #000000));
+  border-image-source: var(--card-border-svg);
+  border-image-slice: 3;
+  border-image-width: 2;
+  border-image-repeat: stretch;
+  border-image-outset: 1;
+  border-style: solid;
+  border-width: 4px;
+  box-shadow: 2px 2px 0 0px var(--card-custom-shadow, var(--shadow-card, #000000));
+  color: var(--card-custom-text, var(--text-card, #000000));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.15s ease;
+}
+
+.retroui-dock-button:hover {
+  filter: brightness(1.15);
+}
+
+.retroui-dock-button:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+@media (min-width: 1024px) {
+  body {
+    zoom: 0.9;
+  }
+}
+
 .widget-handle {
   height: 22px;
   display: flex;
@@ -186,44 +319,63 @@ body::after {
   justify-content: center;
   cursor: grab;
   background: var(--drag-handle-bg);
-  border-top: 1px solid var(--widget-border);
-  border-left: 1px solid var(--widget-border);
-  border-right: 1px solid var(--widget-border);
-  border-radius: 8px 8px 0 0;
+  border-top: var(--widget-border-style, 1px solid var(--widget-border));
+  border-left: var(--widget-border-style, 1px solid var(--widget-border));
+  border-right: var(--widget-border-style, 1px solid var(--widget-border));
+  border-radius: var(--widget-handle-radius, 8px 8px 0 0);
 }
-.widget-handle:active { cursor: grabbing; }
+
+.widget-handle:active {
+  cursor: grabbing;
+}
 
 .widget-body {
   background: var(--widget-bg);
-  border: 1px solid var(--widget-border);
+  border: var(--widget-border-style, 1px solid var(--widget-border));
   border-top: none;
-  border-radius: 0 0 8px 8px;
+  border-radius: var(--widget-body-radius, 0 0 8px 8px);
+  box-shadow: var(--widget-shadow, none);
 }
 
 
 
 @keyframes eq-bar {
-  from { transform: scaleY(0.35); }
-  to   { transform: scaleY(1); }
+  from {
+    transform: scaleY(0.35);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
 }
-.mac-scrollbar::-webkit-scrollbar { width: 4px; }
-.mac-scrollbar::-webkit-scrollbar-track { background: transparent; }
+
+.mac-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.mac-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 .mac-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
 }
+
 .mac-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,255,255,0.18);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: 0.5s;
 }
+
 .custom-tooltip {
   background-color: var(--text-primary);
   color: var(--window-bg);
 }
+
 .custom-tooltip::after {
   content: '';
   position: absolute;
@@ -238,6 +390,7 @@ body::after {
   background-color: var(--text-primary);
   color: var(--window-bg);
 }
+
 .custom-tooltip-bottom::after {
   content: '';
   position: absolute;
@@ -247,5 +400,3 @@ body::after {
   border: 4px solid transparent;
   border-bottom-color: var(--text-primary);
 }
-
-

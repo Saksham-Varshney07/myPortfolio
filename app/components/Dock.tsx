@@ -66,6 +66,8 @@ function DockIcon({
               background: "var(--tooltip-bg)",
               border: "1px solid var(--widget-border)",
               color: "var(--text-primary)",
+              boxShadow: "var(--btn-shadow, none)",
+              borderRadius: "var(--widget-radius, 4px)",
             }}
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
@@ -83,14 +85,17 @@ function DockIcon({
         type="button"
         aria-label={item.label}
         aria-pressed={item.kind === "window" ? isOpen : undefined}
-        style={{ width: size, height: size }}
+        style={{
+          width: size,
+          height: size,
+        }}
         animate={{
-          background: isOpen ? "var(--window-border-focused)" : hovered ? "var(--window-border-unfocused)" : "var(--item-separator)",
-          color: isOpen ? "var(--text-primary)" : "var(--text-secondary)",
+          background: isOpen ? "var(--accent-subtle)" : hovered ? "var(--item-separator)" : "var(--bg-card)",
+          color: "var(--text-primary)",
         }}
         transition={{ duration: 0.15 }}
-        className="rounded-xl flex items-center justify-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
-        whileTap={{ scale: 0.88 }}
+        className="retroui-dock-button flex items-center justify-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+        whileTap={{ scale: 0.9 }}
         onClick={() => {
           playClickSound()
           onActivate()
@@ -107,7 +112,7 @@ function DockIcon({
         aria-hidden="true"
         className="w-1 h-1 rounded-full"
         style={{
-          background: isOpen ? "var(--accent)" : "transparent",
+          background: isOpen ? "var(--indicator-color)" : "transparent",
           transition: "background 0.2s",
         }}
       />
@@ -127,16 +132,13 @@ export default function Dock({
   return (
     <nav
       aria-label="Application dock"
-      className="fixed top-4 left-1/2 -translate-x-1/2 z-[100]"
+      className="fixed top-4 left-1/2 z-[100]"
+      style={{ transform: "translateX(-50%)" }}
     >
       <motion.div
-        className="flex items-end gap-2 px-3 pb-2 pt-2.5 rounded-2xl"
+        className="retroui-card flex items-end gap-2 px-3 pb-2 pt-2.5"
         style={{
           background: "var(--dock-bg)",
-          border: "1px solid var(--widget-border)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.7)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
         }}
         onMouseMove={(e) => mouseX.set(e.pageX)}
         onMouseLeave={() => mouseX.set(Infinity)}

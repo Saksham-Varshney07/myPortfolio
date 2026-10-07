@@ -14,11 +14,12 @@ import CalendarWidget from "./widgets/CalendarWidget"
 import ThemeWidget from "./widgets/ThemeWidget"
 import { ContextMenu, MenuItem } from "./ContextMenu"
 import BootLoadingScreen from "./BootLoadingScreen"
+import { SolaceFieldShader } from "./solace-field-shader"
 import { siteConfig } from "@/config/siteConfig"
 import { windows, type WindowId } from "@/config/windows"
 
 
-const KONAMI = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"]
+const KONAMI = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"]
 
 export default function Desktop() {
   const [isBootLoading, setIsBootLoading] = useState(true)
@@ -82,10 +83,10 @@ export default function Desktop() {
         if (minimizedWindows.includes(wid)) {
           setMinimizedWindows((p) => p.filter((w) => w !== wid))
           focusWindow(wid)
-        } else if (focusedWindow !== wid) { 
-          focusWindow(wid) 
-        } else { 
-          minimizeWindow(wid) 
+        } else if (focusedWindow !== wid) {
+          focusWindow(wid)
+        } else {
+          minimizeWindow(wid)
         }
       } else {
         setOpenWindows((p) => [...p, wid])
@@ -102,9 +103,9 @@ export default function Desktop() {
   }
 
   const contextMenuItems: MenuItem[] = [
-    { label: "New Window",         onClick: () => toggleWindow("about"),    dividerAfter: true },
-    { label: "About this Portfolio",                onClick: () => setShowAboutOverlay(true), dividerAfter: true },
-    { label: "Contact",                             onClick: () => toggleWindow("contact") },
+    { label: "New Window", onClick: () => toggleWindow("about"), dividerAfter: true },
+    { label: "About this Portfolio", onClick: () => setShowAboutOverlay(true), dividerAfter: true },
+    { label: "Contact", onClick: () => toggleWindow("contact") },
   ]
 
   if (isMobile === null) return null
@@ -139,149 +140,170 @@ export default function Desktop() {
           }}
           onClick={() => setContextMenu(null)}
         >
-      <div className="album-wallpaper" aria-hidden="true" />
-
-      <MenuBar focusedApp={focusedTitle} />
-
-      {windows.map((win) => {
-        const Section = win.component
-        return (
-          <Window
-            key={win.id}
-            windowId={win.id}
-            title={win.id === "resume" ? `Resume — ${siteConfig.personal.fullName}` : win.title}
-            isOpen={openWindows.includes(win.id)}
-            isFocused={focusedWindow === win.id}
-            isMinimized={minimizedWindows.includes(win.id)}
-            onClose={() => closeWindow(win.id)}
-            onMinimize={() => minimizeWindow(win.id)}
-            onFocus={() => focusWindow(win.id)}
-            zIndex={getZIndex(win.id)}
-            width={win.width}
-            height={win.height}
-            offsetX={win.offsetX}
-            offsetY={win.offsetY}
-          >
-            <Section compact />
-          </Window>
-        )
-      })}
-
-      <div className="absolute right-6 top-[50px] flex flex-col gap-4 items-end pointer-events-none z-[5]">
-        <motion.div layout transition={{ type: "spring", bounce: 0, duration: 0.4 }} className="pointer-events-auto origin-top-right">
-          <StatusWidget onContactClick={() => toggleWindow("contact")} />
-        </motion.div>
-        <motion.div layout transition={{ type: "spring", bounce: 0, duration: 0.4 }} className="pointer-events-auto origin-top-right">
-          <ThemeWidget />
-        </motion.div>
-        <motion.div layout transition={{ type: "spring", bounce: 0, duration: 0.4 }} className="pointer-events-auto origin-top-right">
-          <GitHubHeatmap />
-        </motion.div>
-      </div>
-
-      <div className="absolute left-4 top-[50px] flex flex-col gap-4 items-start pointer-events-none z-[5]">
-        <motion.div layout transition={{ type: "spring", bounce: 0, duration: 0.4 }} className="pointer-events-auto origin-top-left">
-          <ReadingWidget />
-        </motion.div>
-        <motion.div layout transition={{ type: "spring", bounce: 0, duration: 0.4 }} className="pointer-events-auto origin-top-left">
-          <CalendarWidget />
-        </motion.div>
-        <motion.div layout transition={{ type: "spring", bounce: 0, duration: 0.4 }} className="pointer-events-auto origin-top-left">
-          {/* <VisitorWidget /> */}
-        </motion.div>
-      </div>
-
-      <Dock openWindows={openWindows} onToggleWindow={toggleWindow} />
-
-      <AnimatePresence>
-        {contextMenu && (
-          <ContextMenu
-            x={contextMenu.x}
-            y={contextMenu.y}
-            onClose={() => setContextMenu(null)}
-            items={contextMenuItems}
+          {/* Interactive SolaceUI Repulsion Lattice Shader Background */}
+          <SolaceFieldShader
+            variant="repulsion"
+            palette="solace"
+            dotSize={0.8}
+            scale={1.0}
+            distortion={0.7}
+            trail={0.45}
+            speed={0.7}
+            className="absolute inset-0 w-full h-full pointer-events-none z-0 solace-shader-bg"
           />
-        )}
-      </AnimatePresence>
 
-      <AnimatePresence>
-        {showAboutOverlay && (
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="about-overlay-title"
-            className="fixed inset-0 z-[600] flex items-center justify-center"
-            style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowAboutOverlay(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.94, opacity: 0, y: 8 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.94, opacity: 0, y: 8 }}
-              transition={{ type: "spring", damping: 28, stiffness: 380 }}
-              className="px-8 py-7 text-center"
-              style={{
-                background: "#111",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: 12,
-                width: 320,
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <p className="font-mono text-[10px] uppercase tracking-[0.14em] mb-4" style={{ color: "rgba(255,255,255,0.3)" }}>
-                About this Portfolio
-              </p>
-              <h2 id="about-overlay-title" className="text-[22px] font-semibold text-white mb-1">Saksham&apos;s Portfolio</h2>
-              <p className="font-mono text-[11px] mb-5" style={{ color: "rgba(255,255,255,0.35)" }}>Version 1.0.0</p>
-              <button
-                type="button"
-                className="font-mono text-[10px] uppercase tracking-widest px-4 py-2 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.08)" }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.12)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.07)")}
+          <div className="album-wallpaper" aria-hidden="true" />
+
+          <MenuBar focusedApp={focusedTitle} />
+
+          {windows.map((win) => {
+            const Section = win.component
+            return (
+              <Window
+                key={win.id}
+                windowId={win.id}
+                title={win.id === "resume" ? `Resume — ${siteConfig.personal.fullName}` : win.title}
+                isOpen={openWindows.includes(win.id)}
+                isFocused={focusedWindow === win.id}
+                isMinimized={minimizedWindows.includes(win.id)}
+                onClose={() => closeWindow(win.id)}
+                onMinimize={() => minimizeWindow(win.id)}
+                onFocus={() => focusWindow(win.id)}
+                zIndex={getZIndex(win.id)}
+                width={win.width}
+                height={win.height}
+                offsetX={win.offsetX}
+                offsetY={win.offsetY}
+              >
+                <Section compact />
+              </Window>
+            )
+          })}
+
+          <div className="absolute right-6 top-[50px] flex flex-col gap-4 items-end pointer-events-none z-[5]">
+            <motion.div layout transition={{ type: "spring", bounce: 0, duration: 0.4 }} className="pointer-events-auto origin-top-right">
+              <StatusWidget onContactClick={() => toggleWindow("contact")} />
+            </motion.div>
+            <motion.div layout transition={{ type: "spring", bounce: 0, duration: 0.4 }} className="pointer-events-auto origin-top-right">
+              <ThemeWidget />
+            </motion.div>
+            <motion.div layout transition={{ type: "spring", bounce: 0, duration: 0.4 }} className="pointer-events-auto origin-top-right mt-3">
+              <GitHubHeatmap />
+            </motion.div>
+          </div>
+
+          <div className="absolute left-6 top-[50px] flex flex-col gap-9 items-start pointer-events-none z-[5]">
+            <motion.div layout transition={{ type: "spring", bounce: 0, duration: 0.4 }} className="pointer-events-auto origin-top-left">
+              <ReadingWidget />
+            </motion.div>
+            <motion.div layout transition={{ type: "spring", bounce: 0, duration: 0.4 }} className="pointer-events-auto origin-top-left">
+              <CalendarWidget />
+            </motion.div>
+            <motion.div layout transition={{ type: "spring", bounce: 0, duration: 0.4 }} className="pointer-events-auto origin-top-left">
+              {/* <VisitorWidget /> */}
+            </motion.div>
+          </div>
+
+          <Dock openWindows={openWindows} onToggleWindow={toggleWindow} />
+
+          <AnimatePresence>
+            {contextMenu && (
+              <ContextMenu
+                x={contextMenu.x}
+                y={contextMenu.y}
+                onClose={() => setContextMenu(null)}
+                items={contextMenuItems}
+              />
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {showAboutOverlay && (
+              <motion.div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="about-overlay-title"
+                className="fixed inset-0 z-[600] flex items-center justify-center"
+                style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 onClick={() => setShowAboutOverlay(false)}
               >
-                Close
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                <motion.div
+                  initial={{ scale: 0.94, opacity: 0, y: 8 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.94, opacity: 0, y: 8 }}
+                  transition={{ type: "spring", damping: 28, stiffness: 380 }}
+                  className="px-8 py-7 text-center"
+                  style={{
+                    background: "var(--window-bg)",
+                    border: "1px solid var(--window-border-focused)",
+                    borderRadius: "var(--window-radius, 12px)",
+                    boxShadow: "var(--window-shadow-focused, 0 20px 40px rgba(0,0,0,0.5))",
+                    width: 320,
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] mb-4" style={{ color: "var(--text-muted)" }}>
+                    About this Portfolio
+                  </p>
+                  <h2 id="about-overlay-title" className="text-[22px] font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
+                    Saksham&apos;s Portfolio
+                  </h2>
+                  <p className="font-mono text-[11px] mb-5" style={{ color: "var(--text-secondary)" }}>Version 1.0.0</p>
+                  <button
+                    type="button"
+                    className="font-mono text-[10px] uppercase tracking-widest px-4 py-2 rounded transition-colors focus:outline-none cursor-pointer"
+                    style={{
+                      background: "var(--item-separator)",
+                      color: "var(--text-primary)",
+                      border: "1px solid var(--widget-border)",
+                      boxShadow: "var(--btn-shadow, none)",
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--accent-subtle)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "var(--item-separator)")}
+                    onClick={() => setShowAboutOverlay(false)}
+                  >
+                    Close
+                  </button>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-      <AnimatePresence>
-        {konamiActive && (
-          <motion.div
-            className="fixed inset-0 z-[700] flex items-center justify-center pointer-events-none"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.8, opacity: 0, y: -20 }}
-              transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              className="text-center px-10 py-8"
-              style={{
-                background: "#111",
-                border: "1px solid rgba(255,255,255,0.12)",
-                borderRadius: 12,
-              }}
-            >
-              <p className="font-mono text-[11px] uppercase tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.3)" }}>
-                ✦ Cheat Code Activated ✦
-              </p>
-              <p className="text-[28px] font-semibold text-white mb-2">+99 Engineering Credits</p>
-              <p className="font-mono text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>
-                Hello, fellow human of culture.
-              </p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <AnimatePresence>
+            {konamiActive && (
+              <motion.div
+                className="fixed inset-0 z-[700] flex items-center justify-center pointer-events-none"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.8, opacity: 0, y: -20 }}
+                  transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                  className="text-center px-10 py-8"
+                  style={{
+                    background: "var(--window-bg)",
+                    border: "1px solid var(--window-border-focused)",
+                    borderRadius: "var(--window-radius, 12px)",
+                    boxShadow: "var(--window-shadow-focused, 0 20px 40px rgba(0,0,0,0.5))",
+                  }}
+                >
+                  <p className="font-mono text-[11px] uppercase tracking-[0.2em] mb-3" style={{ color: "var(--text-muted)" }}>
+                    ✦ Cheat Code Activated ✦
+                  </p>
+                  <p className="text-[28px] font-semibold mb-2" style={{ color: "var(--text-primary)" }}>+99 Engineering Credits</p>
+                  <p className="font-mono text-[11px]" style={{ color: "var(--text-secondary)" }}>
+                    Hello, fellow human of culture.
+                  </p>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
     </>

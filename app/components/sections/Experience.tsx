@@ -56,11 +56,11 @@ export default function Experience({ compact = false }: { compact?: boolean }) {
                     {exp.role}
                   </span>
                 </div>
-                <div className="flex items-center justify-end font-mono text-[10px] flex-none">
-                  <span className="text-[var(--text-muted)] group-hover:hidden block">
+                <div className="flex items-center justify-end gap-3 font-mono text-[10px] flex-none">
+                  <span className="text-[var(--text-muted)] whitespace-nowrap">
                     {exp.period}
                   </span>
-                  <span className="hidden group-hover:flex items-center gap-1.5 text-[var(--indicator-color)]">
+                  <span className="hidden group-hover:flex items-center gap-1.5 text-[var(--indicator-color)] whitespace-nowrap">
                     <span className="w-1.5 h-1.5 rounded-full bg-[var(--indicator-color)] animate-pulse" />
                     click to read more !
                   </span>

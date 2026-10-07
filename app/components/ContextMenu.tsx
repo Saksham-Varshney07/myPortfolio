@@ -52,17 +52,17 @@ export function ContextMenu({ x, y, onClose, items }: ContextMenuProps) {
         width: menuWidth,
         background: "var(--tooltip-bg)",
         border: "1px solid var(--widget-border)",
-        borderRadius: 8,
-        boxShadow: "0 16px 48px rgba(0,0,0,0.8)",
+        borderRadius: "var(--widget-radius, 8px)",
+        boxShadow: "var(--window-shadow-focused, 0 16px 48px rgba(0,0,0,0.8))",
       }}
     >
       {items.map((item, i) => (
         <div key={i}>
           <button
-            className="w-full flex items-center justify-between px-3 py-1.5 text-left transition-colors"
+            className="w-full flex items-center justify-between px-3 py-1.5 text-left transition-colors cursor-pointer"
             style={{ color: "var(--text-secondary)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--accent-subtle)")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--accent-subtle)"; e.currentTarget.style.color = "var(--text-primary)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--text-secondary)"; }}
             onClick={() => { item.onClick(); onClose() }}
           >
             <span className="text-[12px]">{item.label}</span>

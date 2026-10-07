@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Eye, CalendarDays, Clock, Monitor } from "lucide-react"
+import { siteConfig } from "@/config/siteConfig"
 
 export default function MenuBar({ focusedApp }: { focusedApp: string | null }) {
   const [timeStr, setTimeStr] = useState("")
@@ -29,11 +30,14 @@ export default function MenuBar({ focusedApp }: { focusedApp: string | null }) {
   return (
     <div
       className="fixed top-0 left-0 right-0 h-7 z-[100] flex items-center justify-between px-4 select-none"
-      style={{ background: "var(--menubar-bg)", borderBottom: "1px solid var(--window-border-unfocused)" }}
+      style={{
+        background: "var(--menubar-bg)",
+        borderBottom: "var(--menubar-border-bottom, 1px solid var(--window-border-unfocused))",
+      }}
     >
       <div className="flex items-center gap-3">
-        <span className="flex items-center gap-1.5 font-mono text-[11px] font-semibold uppercase tracking-widest cursor-pointer" style={{ color: "var(--text-primary)" }}>
-          
+        <span className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-widest cursor-pointer" style={{ color: "var(--text-primary)" }}>
+          {siteConfig.personal.fullName}
         </span>
         <span style={{ color: "var(--separator)", fontSize: 10 }}>|</span>
         <span className="flex items-center gap-1.5 font-mono text-[11px] tracking-wide" style={{ color: "var(--text-muted)" }}>

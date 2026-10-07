@@ -21,9 +21,11 @@ export default function Resume({ compact = false }: { compact?: boolean }) {
           rel="noopener noreferrer"
           className="flex items-center gap-1.5 text-[11px] px-4 py-2 rounded-lg transition-colors"
           style={{
-            background: "var(--widget-border)",
+            background: "var(--item-separator)",
             border: "1px solid var(--widget-border)",
             color: "var(--text-primary)",
+            boxShadow: "var(--btn-shadow, none)",
+            borderRadius: "var(--widget-radius, 8px)",
           }}
         >
           <Download size={12} />
