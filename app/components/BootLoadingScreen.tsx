@@ -59,33 +59,33 @@ export default function BootLoadingScreen({ onComplete }: BootLoadingScreenProps
   }, [triggerExit])
 
   useEffect(() => {
-    const scene = sceneRef.current
-    const first = firstRef.current
-    const second = secondRef.current
-    const cursor = cursorRef.current
-    const cursor2 = cursor2Ref.current
-    const runtime = runtimeRef.current
-    const status = statusRef.current
-    const meter = meterRef.current
-    const error = errorRef.current
-    const output = outputRef.current
-    const opening = openingRef.current
-
     if (
-      !scene ||
-      !first ||
-      !second ||
-      !cursor ||
-      !cursor2 ||
-      !runtime ||
-      !status ||
-      !meter ||
-      !error ||
-      !output ||
-      !opening
+      !sceneRef.current ||
+      !firstRef.current ||
+      !secondRef.current ||
+      !cursorRef.current ||
+      !cursor2Ref.current ||
+      !runtimeRef.current ||
+      !statusRef.current ||
+      !meterRef.current ||
+      !errorRef.current ||
+      !outputRef.current ||
+      !openingRef.current
     ) {
       return
     }
+
+    const scene: HTMLDivElement = sceneRef.current
+    const first: HTMLSpanElement = firstRef.current
+    const second: HTMLSpanElement = secondRef.current
+    const cursor: HTMLSpanElement = cursorRef.current
+    const cursor2: HTMLSpanElement = cursor2Ref.current
+    const runtime: HTMLSpanElement = runtimeRef.current
+    const status: HTMLSpanElement = statusRef.current
+    const meter: HTMLSpanElement = meterRef.current
+    const error: HTMLDivElement = errorRef.current
+    const output: HTMLSpanElement = outputRef.current
+    const opening: HTMLSpanElement = openingRef.current
 
     // Clear and build initial dynamic spans
     output.innerHTML = ""
