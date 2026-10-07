@@ -253,22 +253,46 @@ export default function ThemeWidget() {
     localStorage.removeItem(LS_KEY);
   }, []);
 
-  const applyWithTransition = (action: () => void) => {
-    if (!document.startViewTransition) {
+  const applyWithTransition = (action: () => void, origin?: { x: number; y: number }) => {
+    if (typeof document === "undefined" || !document.startViewTransition) {
       action();
       return;
     }
-    document.startViewTransition(() => {
+
+    const x = origin?.x ?? (window.innerWidth / 2);
+    const y = origin?.y ?? (window.innerHeight / 2);
+    const endRadius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y)
+    );
+
+    const transition = document.startViewTransition(() => {
       action();
     });
+
+    transition.ready.then(() => {
+      document.documentElement.animate(
+        {
+          clipPath: [
+            `circle(0px at ${x}px ${y}px)`,
+            `circle(${endRadius}px at ${x}px ${y}px)`
+          ],
+        },
+        {
+          duration: 650,
+          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          pseudoElement: "::view-transition-new(root)",
+        }
+      );
+    }).catch(() => {});
   };
 
-  const setTheme = (theme: ThemeState) => {
+  const setTheme = (theme: ThemeState, origin?: { x: number; y: number }) => {
     if (theme.type === "predefined") {
       applyWithTransition(() => {
         setHistory(prev => [...prev, theme]);
         applyThemeVars(theme.vars || null, "predefined", !!theme.video);
-      });
+      }, origin);
       return;
     }
 
@@ -278,10 +302,10 @@ export default function ThemeWidget() {
       else if (theme.type === "dark") applyThemeVars(darkThemeVars, "dark", false);
       else if (theme.type === "custom") applyThemeVars(theme.vars || null, "custom", false);
       else applyThemeVars(darkThemeVars, "dark", false);
-    });
+    }, origin);
   };
 
-  const undo = () => {
+  const undo = (origin?: { x: number; y: number }) => {
     if (history.length > 1) {
       applyWithTransition(() => {
         const newHistory = history.slice(0, -1);
@@ -292,7 +316,7 @@ export default function ThemeWidget() {
         else if (prevTheme.type === "custom") applyThemeVars(prevTheme.vars || null, "custom", false);
         else if (prevTheme.type === "predefined") applyThemeVars(prevTheme.vars || null, "predefined", !!prevTheme.video);
         else applyThemeVars(darkThemeVars, "dark", false);
-      });
+      }, origin);
     }
   };
 
@@ -367,7 +391,11 @@ export default function ThemeWidget() {
                 textColor={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "white" : "black"}
                 borderColor={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "white" : "black"}
                 shadow={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "white" : "black"}
-                onClick={() => setTheme({ type: "custom", vars: generateRandomDarkTheme() })}
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const origin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+                  setTheme({ type: "custom", vars: generateRandomDarkTheme() }, origin);
+                }}
                 className="!m-0 w-full flex items-center justify-center gap-1.5 font-minecraft uppercase tracking-wider cursor-pointer"
                 style={{
                   fontSize: `${THEME_BUTTON_CONFIG.fontSize}px`,
@@ -383,7 +411,11 @@ export default function ThemeWidget() {
                 textColor={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "white" : "black"}
                 borderColor={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "white" : "black"}
                 shadow={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "white" : "black"}
-                onClick={undo}
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const origin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+                  undo(origin);
+                }}
                 disabled={history.length <= 1}
                 className="!m-0 w-full flex items-center justify-center gap-1.5 font-minecraft uppercase tracking-wider cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                 style={{
@@ -402,11 +434,13 @@ export default function ThemeWidget() {
                 textColor={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "white" : "black"}
                 borderColor={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "white" : "black"}
                 shadow={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "white" : "black"}
-                onClick={() => {
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const origin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
                   if (currentTheme.type === "dark") {
-                    setTheme({ type: "light", vars: retroThemeVars })
+                    setTheme({ type: "light", vars: retroThemeVars }, origin);
                   } else {
-                    setTheme({ type: "dark", vars: darkThemeVars })
+                    setTheme({ type: "dark", vars: darkThemeVars }, origin);
                   }
                 }}
                 className="!m-0 w-full flex items-center justify-center gap-1.5 font-minecraft uppercase tracking-wider cursor-pointer"
@@ -415,7 +449,19 @@ export default function ThemeWidget() {
                   padding: `${THEME_BUTTON_CONFIG.paddingY}px ${THEME_BUTTON_CONFIG.paddingX}px`,
                 }}
               >
-                {currentTheme.type === "dark" ? <Sun size={THEME_BUTTON_CONFIG.iconSize} className="flex-none" /> : <Moon size={THEME_BUTTON_CONFIG.iconSize} className="flex-none" />}
+                <motion.span
+                  key={currentTheme.type === "dark" ? "sun" : "moon"}
+                  initial={{ rotate: -90, scale: 0.6, opacity: 0 }}
+                  animate={{ rotate: 0, scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 450, damping: 22 }}
+                  className="flex items-center justify-center flex-none"
+                >
+                  {currentTheme.type === "dark" ? (
+                    <Sun size={THEME_BUTTON_CONFIG.iconSize} className="flex-none" />
+                  ) : (
+                    <Moon size={THEME_BUTTON_CONFIG.iconSize} className="flex-none" />
+                  )}
+                </motion.span>
                 <span>{currentTheme.type === "dark" ? "Light Mode" : "Dark Mode"}</span>
               </Button>
             </div>
@@ -442,20 +488,24 @@ export default function ThemeWidget() {
 
               <div className="flex gap-3 mt-1">
                 <button
-                  onClick={() => setTheme({
-                    type: "predefined",
-                    label: "Barcelona",
-                    audio: "/bgm/barcelona.mp3",
-                    audioStartTime: 10,
-                    vars: {
-                      ...darkThemeVars,
-                      "--wallpaper-bg": "url('/bg/fc-barcelona.jpeg') center/cover no-repeat",
-                      "--wallpaper-opacity": "1",
-                      "--wallpaper-blur": "7px",
-                      "--wallpaper-brightness": "0.8",
-                      "--wallpaper-saturate": "1.1"
-                    }
-                  })}
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const origin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+                    setTheme({
+                      type: "predefined",
+                      label: "Barcelona",
+                      audio: "/bgm/barcelona.mp3",
+                      audioStartTime: 10,
+                      vars: {
+                        ...darkThemeVars,
+                        "--wallpaper-bg": "url('/bg/fc-barcelona.jpeg') center/cover no-repeat",
+                        "--wallpaper-opacity": "1",
+                        "--wallpaper-blur": "7px",
+                        "--wallpaper-brightness": "0.8",
+                        "--wallpaper-saturate": "1.1"
+                      }
+                    }, origin);
+                  }}
                   className="group relative overflow-visible w-10 h-10 rounded-md transition-all cursor-pointer flex items-center justify-center font-mono text-[9px]"
                   style={{
                     background: currentTheme.label === "Barcelona" ? "var(--accent-subtle)" : "var(--item-separator)",
@@ -471,20 +521,24 @@ export default function ThemeWidget() {
                   </span>
                 </button>
                 <button
-                  onClick={() => setTheme({
-                    type: "predefined",
-                    label: "Spider-Man",
-                    audio: "/bgm/spiderverse.mp3",
-                    audioStartTime: 3,
-                    vars: {
-                      ...darkThemeVars,
-                      "--wallpaper-bg": "url('/bg/spidey.jpg') center/cover no-repeat",
-                      "--wallpaper-opacity": "1",
-                      "--wallpaper-blur": "6px",
-                      "--wallpaper-brightness": "0.7",
-                      "--wallpaper-saturate": "1.2"
-                    }
-                  })}
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const origin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+                    setTheme({
+                      type: "predefined",
+                      label: "Spider-Man",
+                      audio: "/bgm/spiderverse.mp3",
+                      audioStartTime: 3,
+                      vars: {
+                        ...darkThemeVars,
+                        "--wallpaper-bg": "url('/bg/spidey.jpg') center/cover no-repeat",
+                        "--wallpaper-opacity": "1",
+                        "--wallpaper-blur": "6px",
+                        "--wallpaper-brightness": "0.7",
+                        "--wallpaper-saturate": "1.2"
+                      }
+                    }, origin);
+                  }}
                   className="group relative overflow-visible w-10 h-10 rounded-md transition-all cursor-pointer flex items-center justify-center font-mono text-[9px]"
                   style={{
                     background: currentTheme.label === "Spider-Man" ? "var(--accent-subtle)" : "var(--item-separator)",
@@ -505,19 +559,23 @@ export default function ThemeWidget() {
                   </span>
                 </button>
                 <button
-                  onClick={() => setTheme({
-                    type: "predefined",
-                    label: "Tokyo",
-                    audio: "/bgm/tokyo.mp3",
-                    audioStartTime: 0,
-                    video: "/bg/Tunnel Drift live wallpaper.mp4",
-                    vars: {
-                      ...darkThemeVars,
-                      "--bg-base": "rgba(0,0,0,0.2)",
-                      "--wallpaper-bg": "transparent",
-                      "--wallpaper-opacity": "1"
-                    }
-                  })}
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const origin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+                    setTheme({
+                      type: "predefined",
+                      label: "Tokyo",
+                      audio: "/bgm/tokyo.mp3",
+                      audioStartTime: 0,
+                      video: "/bg/Tunnel Drift live wallpaper.mp4",
+                      vars: {
+                        ...darkThemeVars,
+                        "--bg-base": "rgba(0,0,0,0.2)",
+                        "--wallpaper-bg": "transparent",
+                        "--wallpaper-opacity": "1"
+                      }
+                    }, origin);
+                  }}
                   className="group relative overflow-visible w-10 h-10 rounded-md transition-all cursor-pointer flex items-center justify-center font-mono text-[9px]"
                   style={{
                     background: currentTheme.label === "Tokyo" ? "var(--accent-subtle)" : "var(--item-separator)",
