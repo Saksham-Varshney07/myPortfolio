@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Check, Loader2, Terminal } from "lucide-react"
 
@@ -56,14 +56,14 @@ export default function BootLoadingScreen({ onComplete }: BootLoadingScreenProps
   const hasCompletedRef = useRef(false)
   const videoRef = useRef<HTMLVideoElement>(null)
 
-  const triggerComplete = () => {
+  const triggerComplete = useCallback(() => {
     if (hasCompletedRef.current) return
     hasCompletedRef.current = true
     setIsFinishing(true)
     setTimeout(() => {
       onComplete()
     }, 250)
-  }
+  }, [onComplete])
 
   // -------------------------------------------------------------
   // Boot Sequence Timeline Engine
@@ -109,7 +109,7 @@ export default function BootLoadingScreen({ onComplete }: BootLoadingScreenProps
     return () => {
       cancelAnimationFrame(animationFrameId)
     }
-  }, [])
+  }, [triggerComplete])
 
   // Allow ESC to skip immediately
   useEffect(() => {
@@ -120,7 +120,7 @@ export default function BootLoadingScreen({ onComplete }: BootLoadingScreenProps
     }
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [])
+  }, [triggerComplete])
 
   return (
     <motion.div

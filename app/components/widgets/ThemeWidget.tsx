@@ -148,59 +148,7 @@ const retroThemeVars: Record<string, string> = {
   "--card-border-svg": "var(--retroui-border-svg-light)",
 };
 
-const lightThemeVars: Record<string, string> = {
-  "--font-app": "var(--font-geist-sans), Arial, sans-serif",
-  "--background": "#f4f4f4",
-  "--foreground": "#111111",
-  "--text-primary": "#111111",
-  "--text-secondary": "rgba(0, 0, 0, 0.72)",
-  "--text-muted": "rgba(0, 0, 0, 0.52)",
-  "--text-faint": "rgba(0, 0, 0, 0.32)",
-  "--bg-base": "#f4f4f4",
-  "--bg-dot": "rgba(0, 0, 0, 0.06)",
-  "--titlebar-bg": "#eeeeee",
-  "--window-bg": "#ffffff",
-  "--terminal-bg": "#f9f9f9",
-  "--menubar-bg": "#f4f4f4",
-  "--window-border-focused": "rgba(0, 0, 0, 0.22)",
-  "--window-border-unfocused": "rgba(0, 0, 0, 0.08)",
-  "--widget-bg": "#ffffff",
-  "--widget-border": "rgba(0, 0, 0, 0.1)",
-  "--drag-handle-bg": "rgba(0, 0, 0, 0.03)",
-  "--item-separator": "rgba(0, 0, 0, 0.06)",
-  "--dock-bg": "rgba(242, 242, 242, 0.95)",
-  "--tooltip-bg": "#ffffff",
-  "--accent": "#000000",
-  "--accent-subtle": "rgba(0, 0, 0, 0.1)",
-  "--heatmap-empty": "rgba(0, 0, 0, 0.07)",
-  "--separator": "rgba(0, 0, 0, 0.08)",
-  "--indicator-color": "#16a34a",
-  "--wallpaper-bg": "transparent",
-  "--wallpaper-opacity": "0",
-  "--window-radius": "8px",
-  "--window-shadow-focused": "0 20px 40px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05)",
-  "--window-shadow-unfocused": "0 10px 20px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)",
-  "--window-border-style": "1px solid rgba(0, 0, 0, 0.12)",
-  "--widget-handle-radius": "8px 8px 0 0",
-  "--widget-body-radius": "0 0 8px 8px",
-  "--widget-border-style": "1px solid rgba(0, 0, 0, 0.1)",
-  "--widget-shadow": "none",
-  "--dock-radius": "20px",
-  "--dock-border-style": "1px solid rgba(0, 0, 0, 0.1)",
-  "--dock-shadow": "0 16px 32px rgba(0, 0, 0, 0.08)",
-  "--dock-button-radius": "12px",
-  "--dock-button-border": "none",
-  "--btn-shadow": "none",
-  "--menubar-border-bottom": "1px solid rgba(0, 0, 0, 0.08)",
-  "--primary-bg": "#ffffff",
-  "--primary-text": "#000000",
-  "--secondary-bg": "#f0f0f0",
-  "--secondary-text": "#000000",
-  "--bg-card": "#ffffff",
-  "--text-card": "#000000",
-  "--border-card": "rgba(0, 0, 0, 0.12)",
-  "--shadow-card": "rgba(0, 0, 0, 0.1)",
-};
+
 
 const darkThemeVars: Record<string, string> = {
   "--font-app": "'Minecraft', monospace, sans-serif",
@@ -256,11 +204,11 @@ const darkThemeVars: Record<string, string> = {
 // ─── UI Sizing Config ──────────────────────────────────────────────────────────
 // Easily adjust font sizes and padding for the Theme buttons here:
 export const THEME_BUTTON_CONFIG = {
-  fontSize: 9,      // Font size in pixels (e.g. 8, 9, 10, 11)
-  paddingY: 8,      // Vertical padding in pixels (adjusts button height)
+  fontSize: 11,     // Font size in pixels (increased for better legibility)
+  paddingY: 6,      // Vertical padding in pixels (reduced slightly to keep button height the same)
   paddingX: 8,      // Horizontal padding in pixels
-  iconSize: 10,     // Icon size in pixels (Shuffle, Moon, Undo)
-  gap: 20,           // Spacing between the buttons in pixels
+  iconSize: 12,     // Icon size in pixels (Shuffle, Moon, Undo)
+  gap: 20,          // Spacing between the buttons in pixels
 };
 
 export default function ThemeWidget() {

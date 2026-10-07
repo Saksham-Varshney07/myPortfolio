@@ -72,22 +72,27 @@ export default function Hero({ compact = false }: { compact?: boolean }) {
               { href: social.github,  icon: <Github size={15} />,  label: "GitHub" },
               { href: social.linkedin, icon: <Linkedin size={15} />, label: "LinkedIn" },
               { href: social.leetcode, icon: <SiLeetcode size={15} />, label: "LeetCode" },
-          ].map(({ href, icon, label }) => (
-            <button
-              key={label}
-              onClick={() => window.open(href, "_blank", "noopener,noreferrer")}
-              aria-label={label}
-              className="group relative w-8 h-8 flex items-center justify-center rounded-lg transition-colors cursor-pointer"
-              style={{ color: "var(--text-secondary)" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-secondary)")}
-            >
-              {icon}
-              <span className="custom-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] font-mono rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                {label}
-              </span>
-            </button>
-          ))}
+          ].map(({ href, icon, label }, idx, arr) => {
+            const isLast = idx === arr.length - 1
+            return (
+              <button
+                key={label}
+                onClick={() => window.open(href, "_blank", "noopener,noreferrer")}
+                aria-label={label}
+                className="group relative w-8 h-8 flex items-center justify-center rounded-lg transition-colors cursor-pointer"
+                style={{ color: "var(--text-secondary)" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-secondary)")}
+              >
+                {icon}
+                <span
+                  className={`custom-tooltip ${isLast ? "custom-tooltip-end" : "left-1/2 -translate-x-1/2"} absolute -top-8 px-2 py-1 text-[10px] font-minecraft rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50`}
+                >
+                  {label}
+                </span>
+              </button>
+            )
+          })}
         </div>
       </div>
     </section>
