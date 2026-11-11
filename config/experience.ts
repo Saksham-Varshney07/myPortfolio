@@ -1,4 +1,16 @@
 
+export interface RedactedOfferMeta {
+  id: string
+  codename: string
+  maskedCompany: string
+  location: string
+  duration: string
+  offerType: string
+  revealDate: string
+  cycleStartDate: string
+  statusNote: string
+}
+
 export interface ExperienceItem {
   company: string
   role: string
@@ -7,9 +19,56 @@ export interface ExperienceItem {
   tech: string[]
   achievements: string[]
   links?: { type: string; url: string; label: string }[]
+  redacted?: RedactedOfferMeta
 }
 
 export const experience: ExperienceItem[] = [
+  {
+    company: "[REDACTED]",
+    role: "SDE Intern",
+    period: "Jan 2027 – Jun 2027",
+    description:
+      "Incoming 6-month Software Development Engineer Intern (Remote) — company identity encrypted until joining.",
+    tech: ["6 Months", "Remote", "NDA Active"],
+    achievements: [
+      "Accepted a 6-month remote Software Development Engineer internship offer starting January 1, 2027.",
+      "Organization details, team allocation, and technical stack remain sealed until the countdown completes.",
+    ],
+    redacted: {
+      id: "NODE_01",
+      codename: "sde_intern_6m.enc",
+      maskedCompany: "██████████",
+      location: "Remote",
+      duration: "6 Months",
+      offerType: "Internship Offer",
+      revealDate: "2027-01-01",
+      cycleStartDate: "2026-10-01",
+      statusNote: "OFFER ACCEPTED · STARTS JAN 2027",
+    },
+  },
+  {
+    company: "[REDACTED]",
+    role: "AI Analyst",
+    period: "Starting Jul 2027",
+    description:
+      "Incoming Full-Time AI Analyst @ Bangalore — beginning upon completion of the 6-month internship.",
+    tech: ["Full-Time", "Bangalore", "NDA Active"],
+    achievements: [
+      "Accepted a full-time AI Analyst offer in Bangalore, starting immediately after the 6-month SDE internship concludes.",
+      "Organization details remain encrypted under NDA until the reveal countdown finishes.",
+    ],
+    redacted: {
+      id: "NODE_02",
+      codename: "ai_analyst_blr.enc",
+      maskedCompany: "████████████",
+      location: "Bangalore, IN",
+      duration: "Full-Time",
+      offerType: "Full-Time Offer",
+      revealDate: "2027-07-01",
+      cycleStartDate: "2026-10-01",
+      statusNote: "OFFER ACCEPTED · POST-INTERNSHIP",
+    },
+  },
   {
     company: "SkipQ",
     role: "AI/ML Intern",

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { createPortal, flushSync } from "react-dom"
 import { motion, useDragControls } from "framer-motion"
-import { Shuffle, Sun, Moon, Undo2, Volume2, VolumeX } from "lucide-react"
+import { Shuffle, Sun, Moon, Undo2, RotateCcw, Volume2, VolumeX } from "lucide-react"
 import { Button } from "pixel-retroui"
 import { useWidgetResize } from "./useWidgetResize"
 import WidgetResizeHandles from "./WidgetResizeHandles"
@@ -264,6 +264,20 @@ export default function ThemeWidget() {
   });
 
   const currentTheme = history[history.length - 1];
+  const isDarkSurface =
+    currentTheme.type === "dark" ||
+    currentTheme.type === "custom" ||
+    currentTheme.type === "predefined";
+  const actionBtnPalette = {
+    bg: isDarkSurface ? "black" : "white",
+    textColor: isDarkSurface ? "white" : "black",
+    borderColor: isDarkSurface ? "white" : "black",
+    shadow: isDarkSurface ? "white" : "black",
+  };
+  const actionBtnStyle = {
+    fontSize: `${THEME_BUTTON_CONFIG.fontSize}px`,
+    padding: `${THEME_BUTTON_CONFIG.paddingY}px ${THEME_BUTTON_CONFIG.paddingX}px`,
+  };
 
   useEffect(() => {
     if (audioRef.current) {
@@ -375,24 +389,32 @@ export default function ThemeWidget() {
   return (
     <>
       {typeof document !== "undefined" && currentTheme.video && createPortal(
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          src={currentTheme.video}
+        <div
+          aria-hidden="true"
           style={{
             position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            objectFit: "cover",
+            inset: 0,
+            overflow: "hidden",
             zIndex: -1,
-            filter: "blur(6px) brightness(0.6)",
-            pointerEvents: "none"
+            pointerEvents: "none",
           }}
-        />,
+        >
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            src={currentTheme.video}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              transform: "scale(1.06)",
+              filter: "blur(6px) brightness(0.6)",
+              pointerEvents: "none",
+            }}
+          />
+        </div>,
         document.body
       )}
       <motion.div
@@ -438,53 +460,41 @@ export default function ThemeWidget() {
               style={{ gap: `${THEME_BUTTON_CONFIG.gap}px` }}
             >
               <Button
-                bg={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "black" : "white"}
-                textColor={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "white" : "black"}
-                borderColor={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "white" : "black"}
-                shadow={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "white" : "black"}
+                {...actionBtnPalette}
                 onClick={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   const origin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
                   setTheme({ type: "custom", vars: generateRandomDarkTheme() }, origin, "rgba(255, 255, 255, 0.85)");
                 }}
-                className="!m-0 w-full flex items-center justify-center gap-1.5 font-minecraft uppercase tracking-wider cursor-pointer"
-                style={{
-                  fontSize: `${THEME_BUTTON_CONFIG.fontSize}px`,
-                  padding: `${THEME_BUTTON_CONFIG.paddingY}px ${THEME_BUTTON_CONFIG.paddingX}px`,
-                }}
+                className="!m-0 w-full flex items-center justify-center gap-1.5 font-minecraft uppercase tracking-wider cursor-pointer whitespace-nowrap"
+                style={actionBtnStyle}
               >
                 <Shuffle size={THEME_BUTTON_CONFIG.iconSize} className="transition-colors flex-none" />
                 <span>Generate</span>
               </Button>
 
               <Button
-                bg={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "black" : "white"}
-                textColor={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "white" : "black"}
-                borderColor={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "white" : "black"}
-                shadow={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "white" : "black"}
+                {...actionBtnPalette}
                 onClick={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   const origin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
                   undo(origin, "rgba(255, 255, 255, 0.85)");
                 }}
                 disabled={history.length <= 1}
-                className="!m-0 w-full flex items-center justify-center gap-1.5 font-minecraft uppercase tracking-wider cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-                style={{
-                  fontSize: `${THEME_BUTTON_CONFIG.fontSize}px`,
-                  padding: `${THEME_BUTTON_CONFIG.paddingY}px ${THEME_BUTTON_CONFIG.paddingX}px`,
-                }}
+                className="!m-0 w-full flex items-center justify-center gap-1.5 font-minecraft uppercase tracking-wider cursor-pointer whitespace-nowrap disabled:opacity-30 disabled:cursor-not-allowed"
+                style={actionBtnStyle}
               >
                 <Undo2 size={THEME_BUTTON_CONFIG.iconSize} className="transition-colors flex-none" />
                 <span>Jump Back</span>
               </Button>
             </div>
 
-            <div style={{ marginTop: `${THEME_BUTTON_CONFIG.gap}px` }}>
+            <div
+              className="grid grid-cols-2"
+              style={{ marginTop: `${THEME_BUTTON_CONFIG.gap}px`, gap: `${THEME_BUTTON_CONFIG.gap}px` }}
+            >
               <Button
-                bg={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "black" : "white"}
-                textColor={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "white" : "black"}
-                borderColor={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "white" : "black"}
-                shadow={currentTheme.type === "dark" || currentTheme.type === "custom" || currentTheme.type === "predefined" ? "white" : "black"}
+                {...actionBtnPalette}
                 onClick={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   const origin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
@@ -495,11 +505,8 @@ export default function ThemeWidget() {
                     setTheme({ type: "dark", vars: darkThemeVars }, origin, rippleColor);
                   }
                 }}
-                className="!m-0 w-full flex items-center justify-center gap-1.5 font-minecraft uppercase tracking-wider cursor-pointer"
-                style={{
-                  fontSize: `${THEME_BUTTON_CONFIG.fontSize}px`,
-                  padding: `${THEME_BUTTON_CONFIG.paddingY}px ${THEME_BUTTON_CONFIG.paddingX}px`,
-                }}
+                className="!m-0 w-full flex items-center justify-center gap-1.5 font-minecraft uppercase tracking-wider cursor-pointer whitespace-nowrap"
+                style={actionBtnStyle}
               >
                 <motion.span
                   key={currentTheme.type === "dark" ? "sun" : "moon"}
@@ -515,6 +522,21 @@ export default function ThemeWidget() {
                   )}
                 </motion.span>
                 <span>{currentTheme.type === "dark" ? "Light Mode" : "Dark Mode"}</span>
+              </Button>
+
+              <Button
+                {...actionBtnPalette}
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const origin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+                  setTheme({ type: "light", vars: retroThemeVars }, origin, "rgba(40, 40, 40, 0.85)");
+                }}
+                disabled={currentTheme.type === "light"}
+                className="!m-0 w-full flex items-center justify-center gap-1.5 font-minecraft uppercase tracking-wider cursor-pointer whitespace-nowrap disabled:opacity-30 disabled:cursor-not-allowed"
+                style={actionBtnStyle}
+              >
+                <RotateCcw size={THEME_BUTTON_CONFIG.iconSize} className="transition-colors flex-none" />
+                <span>Default </span>
               </Button>
             </div>
             {/* Predefined Themes */}
@@ -568,7 +590,7 @@ export default function ThemeWidget() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/bg/barcelona.af4e5453.png" alt="FCB" className="w-full h-full object-contain drop-shadow-md" />
-                  <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 text-[9px] font-minecraft rounded bg-black text-white border border-white/40 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                  <span className="absolute bottom-full mb-2 left-0 px-2 py-1 text-[9px] font-minecraft rounded bg-black text-white border border-white/40 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
                     Visca el Barça
                   </span>
                 </button>

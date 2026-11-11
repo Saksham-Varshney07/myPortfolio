@@ -125,54 +125,86 @@ function ProjectList({ projects, onPlayVideo }: { projects: ProjectItem[]; onPla
 export default function Projects({ compact = false }: { compact?: boolean }) {
   const { personal: personalProjects } = projects
   const [activeVideo, setActiveVideo] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
 
-  if (activeVideo && typeof document !== "undefined") {
-    return (
-      <>
-        <motion.section
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className={compact ? "px-6 py-6" : "py-20 px-6"}
-        >
-          <ProjectList projects={personalProjects} onPlayVideo={setActiveVideo} />
-        </motion.section>
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
-        {createPortal(
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] flex flex-col bg-black/95 backdrop-blur-md"
-          >
-            <button
-              onClick={() => setActiveVideo(null)}
-              className="absolute top-8 right-8 z-50 p-3 rounded-full bg-white/10 text-white hover:bg-white/25 transition-colors cursor-pointer"
-            >
-              <X size={24} />
-            </button>
-            <div className="w-full h-full flex items-center justify-center p-8">
-              <video
-                src={activeVideo}
-                autoPlay
-                controls
-                className="w-full h-full object-contain max-h-[85vh] rounded-xl shadow-2xl"
-              />
-            </div>
-          </motion.div>,
-          document.body
-        )}
-      </>
-    )
-  }
+  useEffect(() => {
+    if (!activeVideo) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setActiveVideo(null)
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [activeVideo])
 
   return (
-    <motion.section
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className={compact ? "px-6 py-6" : "py-20 px-6"}
-    >
+    <>
+      <motion.section
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className={compact ? "px-6 py-6" : "py-20 px-6"}
+      >
+        <ProjectList projects={personalProjects} onPlayVideo={setActiveVideo} />
+      </motion.section>
 
-      <ProjectList projects={personalProjects} onPlayVideo={setActiveVideo} />
-    </motion.section>
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {activeVideo && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.16 }}
+                onClick={() => setActiveVideo(null)}
+                className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-6 sm:p-10"
+              >
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setActiveVideo(null)
+                  }}
+                  aria-label="Close video preview"
+                  title="Close preview (Esc)"
+                  className="absolute top-6 right-6 z-[10000] flex items-center justify-center w-10 h-10 rounded-full transition-colors cursor-pointer"
+                  style={{
+                    backgroundColor: "rgba(24, 24, 28, 0.88)",
+                    color: "#ffffff",
+                    border: "1.5px solid rgba(255, 255, 255, 0.55)",
+                    boxShadow: "0 6px 24px rgba(0, 0, 0, 0.65)",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#E81123"
+                    e.currentTarget.style.borderColor = "#ffffff"
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "rgba(24, 24, 28, 0.88)"
+                    e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.55)"
+                  }}
+                >
+                  <X size={20} strokeWidth={2.5} />
+                </button>
+
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-full h-full flex items-center justify-center max-w-6xl"
+                >
+                  <video
+                    src={activeVideo}
+                    autoPlay
+                    controls
+                    className="w-full h-full object-contain max-h-[85vh] rounded-xl shadow-2xl"
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
+    </>
   )
 }

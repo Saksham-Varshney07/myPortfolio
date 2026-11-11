@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "pixel-retroui/dist/index.css";
+@import "pixel-retroui/dist/index.css" layer(base);
 
 @font-face {
   font-family: 'Minecraft';
@@ -440,6 +441,7 @@ body::after {
   right: 0 !important;
   left: auto !important;
   transform: none !important;
+  translate: none !important;
 }
 
 .custom-tooltip-end::after {
@@ -468,7 +470,8 @@ body::after {
   --stripe-color: #000;
 }
 
-[data-theme="light"], .light {
+[data-theme="light"],
+.light {
   --stripe-color: #fff;
 }
 
@@ -476,6 +479,7 @@ body::after {
   from {
     background-position: 50% 50%, 50% 50%;
   }
+
   to {
     background-position: 350% 50%, 350% 50%;
   }
@@ -738,15 +742,24 @@ body::after {
 }
 
 @keyframes py-blink {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0; }
+
+  0%,
+  49% {
+    opacity: 1;
+  }
+
+  50%,
+  100% {
+    opacity: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .py-loader-root .cursor {
     animation: none;
   }
+
   .py-loader-root .meter i {
     transition: none;
   }
-}
+}

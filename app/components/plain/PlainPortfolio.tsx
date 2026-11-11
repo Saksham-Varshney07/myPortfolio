@@ -18,13 +18,102 @@ import {
   Moon,
   Monitor,
   Terminal,
+  Lock,
 } from "lucide-react"
 import { SiLeetcode, SiX } from "react-icons/si"
 import { siteConfig } from "@/config/siteConfig"
-import { experience } from "@/config/experience"
+import { experience, type ExperienceItem } from "@/config/experience"
+import { formatRevealingLabel, useRevealCountdown } from "@/lib/countdown"
 import { projects } from "@/config/projects"
 import { skills } from "@/config/skills"
 import AnimatedRays from "@/components/ui/animated-rays"
+
+function PlainRedactedExperienceItem({
+  item,
+  isLightMode,
+  isLast,
+}: {
+  item: ExperienceItem
+  isLightMode: boolean
+  isLast: boolean
+}) {
+  const redacted = item.redacted!
+  const countdown = useRevealCountdown(redacted.revealDate, redacted.cycleStartDate)
+
+  return (
+    <div
+      className="group relative flex flex-col space-y-3 pb-6 last:pb-0"
+      style={{
+        borderBottom: isLast ? "none" : "1px solid rgba(255, 255, 255, 0.08)",
+      }}
+    >
+      <div
+        className="rounded-2xl p-4 sm:p-5 space-y-3 transition-colors"
+        style={{
+          background: isLightMode ? "rgba(99, 102, 241, 0.05)" : "rgba(99, 102, 241, 0.07)",
+          border: isLightMode ? "1px dashed rgba(99, 102, 241, 0.3)" : "1px dashed rgba(129, 140, 248, 0.3)",
+        }}
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span
+              className="inline-flex items-center justify-center w-7 h-7 rounded-lg"
+              style={{
+                background: isLightMode ? "rgba(99, 102, 241, 0.12)" : "rgba(129, 140, 248, 0.16)",
+                border: "1px solid rgba(129, 140, 248, 0.3)",
+              }}
+            >
+              <Lock size={13} className="text-indigo-400" />
+            </span>
+            <h3 className="text-base font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
+              {item.role}
+            </h3>
+            <span
+              className="text-[10.5px] font-mono px-2 py-0.5 rounded"
+              style={{
+                background: isLightMode ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.07)",
+                color: "var(--text-muted)",
+              }}
+            >
+              {redacted.maskedCompany} · CLASSIFIED
+            </span>
+          </div>
+
+          <span className="text-[11px] font-mono shrink-0" style={{ color: "var(--text-muted)" }}>
+            {item.period}
+          </span>
+        </div>
+
+        <p className="text-[13px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+          {item.description}
+        </p>
+
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {item.tech.map((t) => (
+              <span
+                key={t}
+                className="px-2.5 py-0.5 rounded-md text-[10.5px] font-mono backdrop-blur-md"
+                style={{
+                  background: isLightMode ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.06)",
+                  border: isLightMode ? "1px solid rgba(0,0,0,0.08)" : "1px solid rgba(255,255,255,0.12)",
+                  color: "var(--text-secondary)",
+                }}
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono text-indigo-400 bg-indigo-500/10 border border-indigo-400/25">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+            {formatRevealingLabel(countdown)}
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 interface PlainPortfolioProps {
   onSwitchMode: (mode: "desktop" | "plain") => void
@@ -378,64 +467,73 @@ export default function PlainPortfolio({ onSwitchMode }: PlainPortfolioProps) {
               <span>Work Experience</span>
             </h2>
             <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-white/5 border border-white/10" style={{ color: "var(--text-muted)" }}>
-              {experience.length} Roles
+              {experience.filter((e) => !e.redacted).length} Roles · {experience.filter((e) => e.redacted).length} Upcoming
             </span>
           </div>
 
           <div className="space-y-7">
-            {experience.map((item, idx) => (
-              <div
-                key={item.company + idx}
-                className="group relative flex flex-col space-y-3 pb-6 last:pb-0"
-                style={{
-                  borderBottom: idx === experience.length - 1 ? "none" : "1px solid rgba(255, 255, 255, 0.08)",
-                }}
-              >
-                {/* Header: Company, Role, Date */}
-                <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
-                  <div className="flex items-baseline gap-2.5">
-                    <h3 className="text-base font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
-                      {item.company}
-                    </h3>
-                    <span className="text-xs opacity-40">—</span>
-                    <span className="text-xs font-mono font-medium text-indigo-400">
-                      {item.role}
+            {experience.map((item, idx) =>
+              item.redacted ? (
+                <PlainRedactedExperienceItem
+                  key={item.redacted.id}
+                  item={item}
+                  isLightMode={isLightMode}
+                  isLast={idx === experience.length - 1}
+                />
+              ) : (
+                <div
+                  key={item.company + idx}
+                  className="group relative flex flex-col space-y-3 pb-6 last:pb-0"
+                  style={{
+                    borderBottom: idx === experience.length - 1 ? "none" : "1px solid rgba(255, 255, 255, 0.08)",
+                  }}
+                >
+                  {/* Header: Company, Role, Date */}
+                  <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
+                    <div className="flex items-baseline gap-2.5">
+                      <h3 className="text-base font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
+                        {item.company}
+                      </h3>
+                      <span className="text-xs opacity-40">—</span>
+                      <span className="text-xs font-mono font-medium text-indigo-400">
+                        {item.role}
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-mono shrink-0" style={{ color: "var(--text-muted)" }}>
+                      {item.period}
                     </span>
                   </div>
-                  <span className="text-[11px] font-mono shrink-0" style={{ color: "var(--text-muted)" }}>
-                    {item.period}
-                  </span>
-                </div>
 
-                {/* Achievements Bullet Points */}
-                <ul className="space-y-2 text-[13px] leading-relaxed list-disc list-outside pl-4" style={{ color: "var(--text-secondary)" }}>
-                  {item.achievements.map((ach, aIdx) => (
-                    <li key={aIdx} className="pl-1">
-                      {ach}
-                    </li>
-                  ))}
-                </ul>
-
-                {/* Frosted Tech Pills */}
-                {item.tech && item.tech.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {item.tech.map((t) => (
-                      <span
-                        key={t}
-                        className="px-2.5 py-0.5 rounded-md text-[10.5px] font-mono backdrop-blur-md"
-                        style={{
-                          background: isLightMode ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.06)",
-                          border: isLightMode ? "1px solid rgba(0,0,0,0.08)" : "1px solid rgba(255,255,255,0.12)",
-                          color: "var(--text-secondary)",
-                        }}
-                      >
-                        {t}
-                      </span>
+                  {/* Achievements Bullet Points */}
+                  <ul className="space-y-2 text-[13px] leading-relaxed list-disc list-outside pl-4" style={{ color: "var(--text-secondary)" }}>
+                    {item.achievements.map((ach, aIdx) => (
+                      <li key={aIdx} className="pl-1">
+                        {ach}
+                      </li>
                     ))}
-                  </div>
-                )}
-              </div>
-            ))}
+                  </ul>
+
+                  {/* Frosted Tech Pills */}
+                  {item.tech && item.tech.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {item.tech.map((t) => (
+                        <span
+                          key={t}
+                          className="px-2.5 py-0.5 rounded-md text-[10.5px] font-mono backdrop-blur-md"
+                          style={{
+                            background: isLightMode ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.06)",
+                            border: isLightMode ? "1px solid rgba(0,0,0,0.08)" : "1px solid rgba(255,255,255,0.12)",
+                            color: "var(--text-secondary)",
+                          }}
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            )}
           </div>
         </section>
 
