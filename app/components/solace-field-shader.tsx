@@ -58,6 +58,7 @@ uniform float u_distortion;
 uniform float u_trail;
 uniform float u_dotSize;
 uniform int u_variant;
+uniform int u_fastMode;
 uniform vec3 u_background;
 uniform vec3 u_colorA;
 uniform vec3 u_colorB;
@@ -146,44 +147,63 @@ void main() {
     color = mix(u_background, color, tile);
   } else if (u_variant == 3) {
     // Halftone lattice with crisp small dots matching Solace website
+    // Early-out for top region where horizon mask is 0
+    if (p.y > 0.55) {
+      outColor = vec4(u_background, 1.0);
+      return;
+    }
+
     float dotFactor = clamp(u_dotSize, 0.25, 1.5);
     float density = (40.0 + u_scale * 22.0) * mix(1.0, 1.3, clamp(1.0 - dotFactor, 0.0, 1.0));
     vec2 bounds = vec2(aspect, 1.0);
     vec2 baseCell = floor((p + bounds * 0.5) * density);
     float velocityAmount = min(1.0, length(u_velocity) * 5.0);
+    float influenceRadius = 0.13 + u_trail * 0.06;
+    float mouseZoneRadius = influenceRadius * 2.15 + 0.05;
+    float pixelToMouse = length(p - mouse);
+
+    // Outside the mouse repulsion radius, dots stay at rest inside their own cell
+    int searchRadius = (u_fastMode == 1) ? 0 : (pixelToMouse > mouseZoneRadius ? 0 : 3);
+
     float coverage = 0.0;
     float totalWeight = 0.0;
     vec3 weightedColor = vec3(0.0);
 
-    for (int offsetY = -4; offsetY <= 4; offsetY++) {
-      for (int offsetX = -4; offsetX <= 4; offsetX++) {
+    for (int offsetY = -3; offsetY <= 3; offsetY++) {
+      if (abs(offsetY) > searchRadius) continue;
+      for (int offsetX = -3; offsetX <= 3; offsetX++) {
+        if (abs(offsetX) > searchRadius) continue;
         vec2 cell = baseCell + vec2(float(offsetX), float(offsetY));
         vec2 resting = (cell + 0.5) / density - bounds * 0.5;
-        vec2 away = resting - mouse;
-        float distanceToMouse = length(away);
-        vec2 direction = away / max(distanceToMouse, 0.001);
-        float angle = atan(away.y, away.x);
-
-        // Four soft lobes creating the signature four-point aperture
-        float axisBias = 0.72 + 0.28 * pow(abs(cos(angle * 2.0)), 2.0);
-        float influenceRadius = 0.13 + u_trail * 0.06;
-        float falloff = exp(-pow(distanceToMouse / influenceRadius, 2.0) * 1.55);
-        float force = falloff * axisBias;
-        vec2 tangent = vec2(-direction.y, direction.x);
-        float wake = sin(angle * 2.0 - t * 0.9) * velocityAmount * falloff;
-        vec2 displaced = resting
-          + direction * force * (0.052 + u_distortion * 0.026)
-          + tangent * wake * 0.012
-          + u_velocity * falloff * (0.018 + u_trail * 0.025);
-
-        float pointDistance = length((p - displaced) * density);
         float lowerField = clamp(1.0 - smoothstep(-0.5, 0.48, resting.y), 0.0, 1.0);
         float horizon = smoothstep(0.04, 0.65, lowerField);
-        
-        // Crisp, small halftone dot disc
+        if (horizon <= 0.001) continue;
+
+        vec2 away = resting - mouse;
+        float distanceToMouse = length(away);
+        vec2 displaced = resting;
+        float force = 0.0;
+
+        if (distanceToMouse < mouseZoneRadius) {
+          vec2 direction = away / max(distanceToMouse, 0.001);
+          float angle = atan(away.y, away.x);
+          float cos2 = cos(angle * 2.0);
+          float axisBias = 0.72 + 0.28 * (cos2 * cos2);
+          float normDist = distanceToMouse / influenceRadius;
+          float falloff = exp(-(normDist * normDist) * 1.55);
+          force = falloff * axisBias;
+          vec2 tangent = vec2(-direction.y, direction.x);
+          float wake = sin(angle * 2.0 - t * 0.9) * velocityAmount * falloff;
+          displaced += direction * force * (0.052 + u_distortion * 0.026)
+            + tangent * wake * 0.012
+            + u_velocity * falloff * (0.018 + u_trail * 0.025);
+        }
+
+        float pointDistance = length((p - displaced) * density);
         float pointSize = mix(0.042, 0.092, lowerField) * dotFactor;
+        if (pointDistance > pointSize + 0.015) continue;
+
         float point = 1.0 - smoothstep(pointSize - 0.006, pointSize + 0.014, pointDistance);
-        
         float compression = smoothstep(0.24, 0.76, force * density * 0.18);
         vec3 pointColor = mix(u_colorA, u_colorB, pow(lowerField, 1.15));
         pointColor = mix(pointColor, u_colorC, clamp(compression * 1.1, 0.0, 1.0));
@@ -323,7 +343,11 @@ export function SolaceFieldShader({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const gl = canvas.getContext("webgl2", { alpha: false, antialias: false });
+    const gl = canvas.getContext("webgl2", {
+      alpha: false,
+      antialias: false,
+      powerPreference: "low-power",
+    });
     if (!gl) return;
 
     let shaderProgram: WebGLProgram;
@@ -333,6 +357,16 @@ export function SolaceFieldShader({
       console.error(error);
       return;
     }
+
+    // Detect software WebGL renderers (common on lab PCs / VMs without GPU acceleration)
+    let isSoftwareRenderer = false;
+    try {
+      const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+      if (debugInfo) {
+        const renderer = String(gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || "");
+        isSoftwareRenderer = /swiftshader|llvmpipe|software|microsoft basic render|mesa/i.test(renderer);
+      }
+    } catch {}
 
     const triangle = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, triangle);
@@ -355,51 +389,155 @@ export function SolaceFieldShader({
       trail: location("u_trail"),
       dotSize: location("u_dotSize"),
       variant: location("u_variant"),
+      fastMode: location("u_fastMode"),
       background: location("u_background"),
       colorA: location("u_colorA"),
       colorB: location("u_colorB"),
       colorC: location("u_colorC"),
     };
 
+    const variantIndex = {
+      viscous: 0,
+      reaction: 1,
+      cellular: 2,
+      repulsion: 3,
+      magnetic: 4,
+      chromatic: 5,
+    }[variant];
+
     const target = { x: 0.5, y: 0.5 };
     const mouse = { x: 0.5, y: 0.5 };
     const previous = { x: 0.5, y: 0.5 };
     let frame = 0;
     let disposed = false;
+    let needsRender = true;
+    let fastMode = isSoftwareRenderer;
+    let maxDpr = isSoftwareRenderer ? 0.7 : 1.25;
+    let slowFrames = 0;
+    let lastDrawNow = 0;
+    let cachedRect = canvas.getBoundingClientRect();
+    let cachedPaletteKey = "";
+    let cachedPaletteRgb = {
+      bg: rgb(FIELD_PALETTES.solace.background),
+      a: rgb(FIELD_PALETTES.solace.primary),
+      b: rgb(FIELD_PALETTES.solace.secondary),
+      c: rgb(FIELD_PALETTES.solace.highlight),
+    };
     const started = performance.now();
+    const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const isShaderHidden = () => {
+      if (document.hidden) return true;
+      const root = document.documentElement;
+      return (
+        root.getAttribute("data-theme") === "light" ||
+        root.getAttribute("data-theme-video") === "true"
+      );
+    };
+
+    const scheduleFrame = () => {
+      if (disposed || frame !== 0 || isShaderHidden()) return;
+      frame = requestAnimationFrame(render);
+    };
 
     const move = (event: PointerEvent | MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      if (!rect.width || !rect.height) return;
-      target.x = (event.clientX - rect.left) / rect.width;
-      target.y = 1 - (event.clientY - rect.top) / rect.height;
+      if (!cachedRect.width || !cachedRect.height) return;
+      target.x = (event.clientX - cachedRect.left) / cachedRect.width;
+      target.y = 1 - (event.clientY - cachedRect.top) / cachedRect.height;
+      needsRender = true;
+      scheduleFrame();
     };
-    window.addEventListener("pointermove", move);
+    window.addEventListener("pointermove", move, { passive: true });
 
     const resize = () => {
-      const rect = canvas.getBoundingClientRect();
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
-      const width = Math.max(1, Math.round(rect.width * ratio));
-      const height = Math.max(1, Math.round(rect.height * ratio));
+      cachedRect = canvas.getBoundingClientRect();
+      const ratio = Math.min(window.devicePixelRatio || 1, maxDpr);
+      const width = Math.max(1, Math.round(cachedRect.width * ratio));
+      const height = Math.max(1, Math.round(cachedRect.height * ratio));
       if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width;
         canvas.height = height;
+        needsRender = true;
+        scheduleFrame();
       }
     };
     const observer = new ResizeObserver(resize);
     observer.observe(canvas);
     resize();
 
+    const themeObserver = new MutationObserver(() => {
+      if (!isShaderHidden()) {
+        needsRender = true;
+        lastDrawNow = 0;
+        scheduleFrame();
+      } else if (frame !== 0) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+      }
+    });
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme", "data-theme-video"],
+    });
+
+    const handleVisibility = () => {
+      if (!isShaderHidden()) {
+        needsRender = true;
+        lastDrawNow = 0;
+        scheduleFrame();
+      } else if (frame !== 0) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
     const render = (now: number) => {
-      if (disposed) return;
+      frame = 0;
+      if (disposed || isShaderHidden()) return;
+
+      // Throttle FPS slightly when running on software/low-power fallback
+      const minInterval = fastMode ? 33 : 0;
+      if (lastDrawNow && now - lastDrawNow < minInterval) {
+        scheduleFrame();
+        return;
+      }
+
+      if (lastDrawNow) {
+        const dt = now - lastDrawNow;
+        if (dt > 55) {
+          slowFrames += 1;
+          if (slowFrames >= 4 && !fastMode) {
+            fastMode = true;
+            maxDpr = 0.7;
+            resize();
+          }
+        } else {
+          slowFrames = 0;
+        }
+      }
+      lastDrawNow = now;
+
       mouse.x += (target.x - mouse.x) * 0.09;
       mouse.y += (target.y - mouse.y) * 0.09;
       const velocityX = mouse.x - previous.x;
       const velocityY = mouse.y - previous.y;
       previous.x = mouse.x;
       previous.y = mouse.y;
+
       const current = settingsRef.current;
       const paletteColors = current.colors ?? FIELD_PALETTES[current.palette] ?? FIELD_PALETTES.solace;
+      const paletteKey = `${paletteColors.background}|${paletteColors.primary}|${paletteColors.secondary}|${paletteColors.highlight}`;
+      if (paletteKey !== cachedPaletteKey) {
+        cachedPaletteKey = paletteKey;
+        cachedPaletteRgb = {
+          bg: rgb(paletteColors.background),
+          a: rgb(paletteColors.primary),
+          b: rgb(paletteColors.secondary),
+          c: rgb(paletteColors.highlight),
+        };
+      }
+
       gl.viewport(0, 0, canvas.width, canvas.height);
       gl.useProgram(shaderProgram);
       gl.uniform2f(uniforms.resolution, canvas.width, canvas.height);
@@ -412,28 +550,37 @@ export function SolaceFieldShader({
       gl.uniform1f(uniforms.distortion, current.distortion);
       gl.uniform1f(uniforms.trail, current.trail);
       gl.uniform1f(uniforms.dotSize, current.dotSize ?? 0.58);
-      const variantIndex = {
-        viscous: 0,
-        reaction: 1,
-        cellular: 2,
-        repulsion: 3,
-        magnetic: 4,
-        chromatic: 5,
-      }[variant];
       gl.uniform1i(uniforms.variant, variantIndex);
-      gl.uniform3fv(uniforms.background, rgb(paletteColors.background));
-      gl.uniform3fv(uniforms.colorA, rgb(paletteColors.primary));
-      gl.uniform3fv(uniforms.colorB, rgb(paletteColors.secondary));
-      gl.uniform3fv(uniforms.colorC, rgb(paletteColors.highlight));
+      gl.uniform1i(uniforms.fastMode, fastMode ? 1 : 0);
+      gl.uniform3fv(uniforms.background, cachedPaletteRgb.bg);
+      gl.uniform3fv(uniforms.colorA, cachedPaletteRgb.a);
+      gl.uniform3fv(uniforms.colorB, cachedPaletteRgb.b);
+      gl.uniform3fv(uniforms.colorC, cachedPaletteRgb.c);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
-      frame = requestAnimationFrame(render);
+
+      const settled =
+        Math.abs(target.x - mouse.x) < 0.0004 &&
+        Math.abs(target.y - mouse.y) < 0.0004 &&
+        Math.abs(velocityX) < 0.0001 &&
+        Math.abs(velocityY) < 0.0001;
+
+      if (reducedMotionQuery.matches || (variant === "repulsion" && settled && !needsRender)) {
+        lastDrawNow = 0;
+        return;
+      }
+
+      needsRender = false;
+      scheduleFrame();
     };
-    frame = requestAnimationFrame(render);
+
+    scheduleFrame();
 
     return () => {
       disposed = true;
-      cancelAnimationFrame(frame);
+      if (frame !== 0) cancelAnimationFrame(frame);
       observer.disconnect();
+      themeObserver.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("pointermove", move);
       gl.deleteBuffer(triangle);
       gl.deleteProgram(shaderProgram);

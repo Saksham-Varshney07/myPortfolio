@@ -187,7 +187,7 @@ export default function PlainPortfolio({ onSwitchMode }: PlainPortfolioProps) {
       {/* Floating Apple macOS Sequoia Style Capsule Header */}
       <header className="sticky top-4 z-50 px-4 sm:px-6">
         <div
-          className="max-w-3xl mx-auto h-13 px-4 rounded-full flex items-center justify-between gap-3 backdrop-blur-2xl transition-all duration-300"
+          className="max-w-3xl mx-auto h-13 px-4 rounded-full flex items-center justify-between gap-3 backdrop-blur-md transition-all duration-300"
           style={{
             background: isLightMode
               ? "rgba(255, 255, 255, 0.72)"
@@ -285,7 +285,7 @@ export default function PlainPortfolio({ onSwitchMode }: PlainPortfolioProps) {
         {/* ========================================================= */}
         <section
           id="about"
-          className="rounded-3xl p-6 sm:p-9 backdrop-blur-2xl transition-all duration-300 relative overflow-hidden"
+          className="rounded-3xl p-6 sm:p-9 backdrop-blur-md transition-all duration-300 relative overflow-hidden"
           style={{
             background: isLightMode
               ? "rgba(255, 255, 255, 0.65)"
@@ -448,7 +448,7 @@ export default function PlainPortfolio({ onSwitchMode }: PlainPortfolioProps) {
         {/* ========================================================= */}
         <section
           id="experience"
-          className="rounded-3xl p-6 sm:p-8 backdrop-blur-2xl transition-all duration-300 space-y-7"
+          className="rounded-3xl p-6 sm:p-8 backdrop-blur-md transition-all duration-300 space-y-7"
           style={{
             background: isLightMode
               ? "rgba(255, 255, 255, 0.65)"
@@ -564,7 +564,7 @@ export default function PlainPortfolio({ onSwitchMode }: PlainPortfolioProps) {
                 href={p.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group p-6 rounded-3xl backdrop-blur-2xl transition-all duration-300 block cursor-pointer hover:scale-[1.01]"
+                className="group p-6 rounded-3xl backdrop-blur-md transition-all duration-300 block cursor-pointer hover:scale-[1.01]"
                 style={{
                   background: isLightMode
                     ? "rgba(255, 255, 255, 0.65)"
@@ -618,7 +618,7 @@ export default function PlainPortfolio({ onSwitchMode }: PlainPortfolioProps) {
         {/* ========================================================= */}
         <section
           id="skills"
-          className="rounded-3xl p-6 sm:p-8 backdrop-blur-2xl transition-all duration-300 space-y-6"
+          className="rounded-3xl p-6 sm:p-8 backdrop-blur-md transition-all duration-300 space-y-6"
           style={{
             background: isLightMode
               ? "rgba(255, 255, 255, 0.65)"
@@ -675,7 +675,7 @@ export default function PlainPortfolio({ onSwitchMode }: PlainPortfolioProps) {
         {/* EDUCATION — Frosted Glass Card                            */}
         {/* ========================================================= */}
         <section
-          className="rounded-3xl p-6 sm:p-7 backdrop-blur-2xl transition-all duration-300 space-y-4"
+          className="rounded-3xl p-6 sm:p-7 backdrop-blur-md transition-all duration-300 space-y-4"
           style={{
             background: isLightMode
               ? "rgba(255, 255, 255, 0.65)"
@@ -718,7 +718,7 @@ export default function PlainPortfolio({ onSwitchMode }: PlainPortfolioProps) {
         {/* ========================================================= */}
         <section
           id="contact"
-          className="rounded-3xl p-7 sm:p-9 text-center space-y-4 backdrop-blur-2xl transition-all duration-300"
+          className="rounded-3xl p-7 sm:p-9 text-center space-y-4 backdrop-blur-md transition-all duration-300"
           style={{
             background: isLightMode
               ? "rgba(255, 255, 255, 0.7)"

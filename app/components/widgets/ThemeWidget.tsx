@@ -350,7 +350,7 @@ export default function ThemeWidget() {
           pseudoElement: "::view-transition-new(root)",
         }
       );
-    }).catch(() => {});
+    }).catch(() => { });
   };
 
   const setTheme = (theme: ThemeState, origin?: { x: number; y: number }, rippleColor?: string) => {
@@ -628,9 +628,9 @@ export default function ThemeWidget() {
                     className="w-full h-full object-contain drop-shadow-md transition-all"
                     style={{ filter: (currentTheme.type === 'default' || currentTheme.type === 'light') ? 'invert(1)' : 'none' }}
                   />
-                  <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 text-[9px] font-minecraft rounded bg-black text-white border border-white/40 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                    Spider-Tingle
-                  </span>
+                    <span className="tooltip-center absolute bottom-full mb-2 px-2 py-1 text-[9px] font-minecraft rounded bg-black text-white border border-white/40 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                      Spider-Tingle
+                    </span>
                 </button>
                 <button
                   onClick={(e) => {
@@ -660,9 +660,9 @@ export default function ThemeWidget() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/bg/tokyodriftlogo.png" alt="Tokyo Drift" className="w-[140%] h-[140%] max-w-none object-contain drop-shadow-md" />
-                  <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 text-[9px] font-minecraft rounded bg-black text-white border border-white/40 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                    Tokyo Drift
-                  </span>
+                    <span className="tooltip-center absolute bottom-full mb-2 px-2 py-1 text-[9px] font-minecraft rounded bg-black text-white border border-white/40 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                      Tokyo Drift
+                    </span>
                 </button>
               </div>
             </div>

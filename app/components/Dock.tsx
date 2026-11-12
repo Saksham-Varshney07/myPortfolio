@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from "framer-motion"
 import { Github, Linkedin, FileText } from "lucide-react"
 import { SiLeetcode } from "react-icons/si"
@@ -40,11 +40,25 @@ function DockIcon({
   onActivate: () => void
 }) {
   const ref = useRef<HTMLButtonElement>(null)
+  const centerXRef = useRef<number>(0)
   const [hovered, setHovered] = useState(false)
 
+  useEffect(() => {
+    const measure = () => {
+      const bounds = ref.current?.getBoundingClientRect()
+      if (bounds) {
+        centerXRef.current = bounds.x + bounds.width / 2
+      }
+    }
+    measure()
+    document.fonts?.ready.then(measure).catch(() => {})
+    window.addEventListener("resize", measure)
+    return () => window.removeEventListener("resize", measure)
+  }, [])
+
   const distance = useTransform(mouseX, (val) => {
-    const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 }
-    return val - bounds.x - bounds.width / 2
+    if (!Number.isFinite(val)) return 9999
+    return val - centerXRef.current
   })
 
   const sizeTransform = useTransform(distance, [-120, 0, 120], [40, 62, 40])
@@ -152,7 +166,7 @@ export default function Dock({
         style={{
           background: "var(--dock-bg)",
         }}
-        onMouseMove={(e) => mouseX.set(e.pageX)}
+        onMouseMove={(e) => mouseX.set(e.clientX)}
         onMouseLeave={() => mouseX.set(Infinity)}
       >
         {dockApps.map((item) => (

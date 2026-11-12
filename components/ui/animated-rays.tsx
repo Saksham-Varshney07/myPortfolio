@@ -73,8 +73,8 @@ export function AnimatedRays({
                     style={{
                         backgroundImage: `${stripes}, ${rainbow}`,
                         backgroundSize: "200%, 100%",
-                        backgroundAttachment: "fixed",
                         mixBlendMode: "difference",
+                        willChange: "background-position",
                     }}
                 />
             </div>

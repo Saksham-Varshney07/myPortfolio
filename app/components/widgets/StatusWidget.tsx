@@ -42,7 +42,7 @@ export default function StatusWidget({ onContactClick }: { onContactClick?: () =
         {/* Rotating border line with a chipped (missing) segment */}
         <div className="absolute inset-0 rounded-[6px] overflow-hidden pointer-events-none z-0">
           <div 
-            className="absolute inset-[-150%] animate-[spin_4s_linear_infinite]"
+            className="absolute inset-[-65%] animate-[spin_4s_linear_infinite] will-change-transform"
             style={{
               background: "conic-gradient(from 0deg, var(--status-border-color, var(--border-card, #000000)) 0deg, var(--status-border-color, var(--border-card, #000000)) 250deg, transparent 250deg, transparent 360deg)",
             }}
